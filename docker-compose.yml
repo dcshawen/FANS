@@ -11,3 +11,13 @@ services:
     volumes:
       - /${PWD}/frontend:/app
       - /app/node_modules
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: FANTS-FastAPI-Dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
