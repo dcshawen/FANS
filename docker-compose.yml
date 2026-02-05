@@ -21,3 +21,14 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+  db:
+    image: mariadb:10.11
+    container_name: FANS-MariaDB
+    env_file:
+      - ./backend/db.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./backend/db_data:/var/lib/mysql
+      - ./backend/initdb:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
