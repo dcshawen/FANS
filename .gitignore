@@ -428,3 +428,28 @@ Thumbs.db
 
 # Database
 backend/db_data/
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
