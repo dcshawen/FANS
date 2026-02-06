@@ -1,0 +1,24 @@
+// Run the following in bash/PS in the frontend dir
+npm install maplibre-gl
+
+// Default map
+<MapComponent />
+
+// Custom location (Halifax)
+<MapComponent center={[-63.5923, 44.6509]} zoom={6} />
+
+// Custom size
+<MapComponent width="800px" height="600px" />
+
+// Different map style - to be done later
+<MapComponent style="https://your-custom-style.json" />
+
+// All custom props
+<MapComponent 
+  center={[2.3522, 48.8566]} 
+  zoom={12} 
+  style="https://your-style.json"
+  width="90vw"
+  height="500px"
+/>
+
