@@ -1,14 +1,81 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import logo from '../assets/FANSlogo.png';
 
 export default function RegisterService() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const onSubmit = (data) => {
-    console.log('Form submitted:', data);
-    // Handle form submission here
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Map form data to backend API format
+      const organizationData = {
+        name: data.organizationName,
+        description: data.description,
+        street_address: data.street,
+        city: data.city,
+        postal_code: data.postalCode,
+        latitude: null, // Can be geocoded later
+        longitude: null
+      };
+
+      const response = await fetch('http://localhost:8000/organizations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(organizationData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to submit organization');
+      }
+
+      const createdOrg = await response.json();
+      console.log('Organization created:', createdOrg);
+
+      // Create contact information if provided
+      if (data.email || data.phone) {
+        const contactData = {
+          location_id: createdOrg.location_id,
+          phone_number: data.phone || null,
+          websit_url: null
+        };
+
+        const contactResponse = await fetch('http://localhost:8000/contacts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(contactData),
+        });
+
+        if (!contactResponse.ok) {
+          console.error('Failed to create contact information');
+        }
+      }
+
+      setSubmitSuccess(true);
+      
+      // Redirect after successful submission
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitError(error.message || 'Failed to submit the form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -49,6 +116,20 @@ export default function RegisterService() {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Success Message */}
+            {submitSuccess && (
+              <div className="alert alert-success mb-4" role="alert">
+                <strong>Success!</strong> Your organization has been registered. Redirecting...
+              </div>
+            )}
+
+            {/* Error Message */}
+            {submitError && (
+              <div className="alert alert-danger mb-4" role="alert">
+                <strong>Error:</strong> {submitError}
+              </div>
+            )}
+
             {/* Organization Name */}
             <div className="mb-3">
               <label className="form-label fw-medium" style={{ color: '#3A3F47' }}>
@@ -207,6 +288,7 @@ export default function RegisterService() {
                 type="button"
                 onClick={handleBack}
                 className="btn btn-outline-secondary btn-lg flex-fill"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
@@ -214,8 +296,16 @@ export default function RegisterService() {
                 type="submit"
                 className="btn btn-lg flex-fill text-white"
                 style={{ backgroundColor: '#6A7F5F', border: 'none' }}
+                disabled={isSubmitting}
               >
-                Submit for Review
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit for Review'
+                )}
               </button>
             </div>
           </form>
