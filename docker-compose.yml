@@ -22,3 +22,13 @@ services:
       - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: FANTS-FastAPI-Dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app

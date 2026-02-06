@@ -1,0 +1,5 @@
+// Run in bash in frontend dir 
+npm install graphhopper-js-api-client
+
+// Add GRAPH_API_KEY to your .env (check the discord pins for key)
+

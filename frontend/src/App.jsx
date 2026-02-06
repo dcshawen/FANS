@@ -2,8 +2,12 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import MapComponent from './map.jsx';
+
 
 function App() {
+
+
   const [count, setCount] = useState(0)
 
   return (
@@ -21,6 +25,7 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <MapComponent center={[-63.5923, 44.6509]} zoom={6} />
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
