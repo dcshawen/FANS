@@ -1,0 +1,34 @@
+name: FANS-Dev
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: FANS-React-Dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - /${PWD}/frontend:/app
+      - /app/node_modules
+  db:
+    image: mariadb:10.11
+    container_name: FANS-MariaDB
+    env_file:
+      - ./backend/db.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./backend/db_data:/var/lib/mysql
+      - ./backend/initdb:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: FANTS-FastAPI-Dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
