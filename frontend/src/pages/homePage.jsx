@@ -25,7 +25,7 @@ export default function HomePage({ onGetStarted }) {
         
         
         <p className="text-white fs-6 fs-md-5 mb-2 mb-md-3 text-center px-2" style={{ maxWidth: '600px', opacity: 0.9 }}>
-          Find food banks, community fridges, meal programs, and other food resources near you in Halifax Regional Municipality.
+          Find food banks, community fridges, meal programs, and other food resources near you!
         </p>
 
        
