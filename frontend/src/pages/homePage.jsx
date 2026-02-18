@@ -68,6 +68,10 @@ export default function HomePage({ onGetStarted }) {
         zoom={7} 
         width="600px"
         height="250px"
+        maxBounds={[
+    [-66.25, 43.38],  // Southwest corner [longitude, latitude]
+    [-59.70, 47.64]   // Northeast corner [longitude, latitude]
+]}
         />
         
       </div>

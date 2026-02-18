@@ -22,3 +22,14 @@ npm install maplibre-gl
   height="500px"
 />
 
+// Styles from OpenMapTiles (requires attribution and self-host, non-profit only)
+Street view style: https://github.com/openmaptiles/openmaptiles/tree/master/style
+Government of Canada Vector Tiles: https://open.canada.ca/data/en/dataset/7dd22445-fa7f-49f4-ae9a-2cf70af8f875 
+
+
+// Tile hosting/rendering 
+Planetiler: https://github.com/onthegomap/planetiler (Java)
+PMTiles: https://docs.protomaps.com/pmtiles/ 
+
+
+
