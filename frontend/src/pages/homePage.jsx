@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/FANSlogo.png';
 import MapComponent from '../map.jsx';
+import MapComponent from '../map.jsx';
 
 export default function HomePage({ onGetStarted }) {
   const navigate = useNavigate();
