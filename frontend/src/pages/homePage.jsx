@@ -1,4 +1,5 @@
 import logo from '../assets/FANSlogo.png';
+import MapComponent from '../map.jsx';
 
 export default function HomePage({ onGetStarted }) {
   const getLogoSize = () => {
@@ -60,7 +61,17 @@ export default function HomePage({ onGetStarted }) {
           Find Food Resources
         </button>
       </div>
-
+      {/* Map Section */}
+      <div style={{ justifyContent: 'center', display: 'flex', marginBottom: '40px', marginTop: '40px', paddingBottom: '40px' }}>
+        <MapComponent 
+        center={[-63.5923, 44.6509]} 
+        zoom={7} 
+        width="600px"
+        height="250px"
+        />
+        
+      </div>
+      {/* End of map */}
     </div>
   );
 }
