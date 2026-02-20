@@ -8,6 +8,9 @@ services:
     container_name: FANS-React-Dev
     ports:
       - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend:/app
       - ./frontend/public:/app/public
