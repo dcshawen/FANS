@@ -1,12 +1,13 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { PMTiles, Protocol } from 'pmtiles';
+import './map.css'
 
 
 function MapComponent({ 
     center = [0, 0], 
-    zoom = 1, 
-    style = 'https://www.arcgis.com/sharing/rest/content/items/800d755712e8415aab301b9d55bc2800/resources/styles/root.json?f=pjson',
+    zoom = 1,
     width = '100%',
     height = '400px',
     maxBounds = [
@@ -14,10 +15,15 @@ function MapComponent({
     [-59.70, 47.64]   // Northeast corner [longitude, latitude]
 ],
     minZoom = 6, 
-    maxZoom = 20
+    maxZoom = 20,
+    onMarkerClick = null //Callback for marker click
 }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
+    const [userLocation, setUserLocation] = useState(null);
+    const [selectedMarker, setSelectedMarker] = useState(null);
+    const [markers, setMarkers] = useState([]);
+    const useMarkerRef = useRef({}); // Ref to store marker instances
 
     useEffect(() => {
         if (map.current) return; // Initialize map only once
