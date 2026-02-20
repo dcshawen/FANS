@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/FANSlogo.png';
 
 export default function HomePage({ onGetStarted }) {
+  const navigate = useNavigate();
   const getLogoSize = () => {
     if (window.innerWidth < 576) return '160px'; // Mobile
     if (window.innerWidth < 768) return '200px'; // Tablet
@@ -50,15 +52,28 @@ export default function HomePage({ onGetStarted }) {
         </div>
 
     
-        <button
-          onClick={onGetStarted}
-          className="btn btn-md btn-lg-lg fw-semibold shadow-lg px-4 px-md-5 py-2 py-md-3"
-          style={{ backgroundColor: '#FFB88C', color: 'white', border: 'none' }}
-          onMouseOver={(e) => e.target.style.opacity = '0.9'}
-          onMouseOut={(e) => e.target.style.opacity = '1'}
-        >
-          Find Food Resources
-        </button>
+        {/* TEMPORARY - bypassing location input, linking directly to map */}
+        <div className="d-flex gap-3 flex-wrap justify-content-center">
+          <button
+            onClick={() => navigate('/map')}
+            className="btn btn-md btn-lg-lg fw-semibold shadow-lg px-4 px-md-5 py-2 py-md-3"
+            style={{ backgroundColor: '#FFB88C', color: 'white', border: 'none' }}
+            onMouseOver={(e) => e.target.style.opacity = '0.9'}
+            onMouseOut={(e) => e.target.style.opacity = '1'}
+          >
+            Find Food Resources
+          </button>
+          <button
+            onClick={() => navigate('/register')}
+            className="btn btn-md btn-lg-lg fw-semibold shadow-lg px-4 px-md-5 py-2 py-md-3"
+            style={{ backgroundColor: '#8FBC8F', color: 'white', border: 'none' }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#7DAF7D'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#8FBC8F'}
+          >
+            <i className="bi bi-plus-circle me-2"></i>
+            Join The Network
+          </button>
+        </div>
       </div>
 
     </div>
