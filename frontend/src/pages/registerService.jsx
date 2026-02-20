@@ -1,10 +1,30 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import logo from '../assets/FANSlogo.png';
 
+const API_BASE_URL = 'http://localhost:8000';
+
+const DAYS_OF_WEEK = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday'
+];
+
 export default function RegisterService() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, formState: { errors } } = useForm({
+    defaultValues: {
+      schedules: [{ day_of_week: 'Monday', open_time: '09:00', close_time: '17:00' }]
+    }
+  });
+  const { fields: scheduleFields, append: appendSchedule, remove: removeSchedule } = useFieldArray({
+    control,
+    name: 'schedules'
+  });
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -15,57 +35,94 @@ export default function RegisterService() {
     setSubmitError(null);
     
     try {
-      // Map form data to backend API format
+      // 1. Create Organization (matches OrganizationCreate model)
       const organizationData = {
-        name: data.organizationName,
-        description: data.description,
-        street_address: data.street,
-        city: data.city,
-        postal_code: data.postalCode,
-        latitude: null, // Can be geocoded later
-        longitude: null
+        name: data.name,
+        description: data.description || null,
+        street_address: data.street_address || null,
+        city: data.city || null,
+        postal_code: data.postal_code || null
       };
 
-      const response = await fetch('http://localhost:8000/organizations', {
+      const orgResponse = await fetch(`${API_BASE_URL}/organizations`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(organizationData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to submit organization');
+      if (!orgResponse.ok) {
+        const errorData = await orgResponse.json();
+        throw new Error(errorData.detail || 'Failed to create organization');
       }
 
-      const createdOrg = await response.json();
+      const createdOrg = await orgResponse.json();
+      const locationId = createdOrg.location_id;
       console.log('Organization created:', createdOrg);
 
-      // Create contact information if provided
-      if (data.email || data.phone) {
+      // 2. Create Contact (matches ContactCreate model)
+      if (data.phone_number || data.website_url) {
         const contactData = {
-          location_id: createdOrg.location_id,
-          phone_number: data.phone || null,
-          websit_url: null
+          location_id: locationId,
+          phone_number: data.phone_number || null,
+          websit_url: data.website_url || null  // Note: API has typo "websit_url"
         };
 
-        const contactResponse = await fetch('http://localhost:8000/contacts', {
+        const contactResponse = await fetch(`${API_BASE_URL}/contacts`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(contactData),
         });
 
         if (!contactResponse.ok) {
-          console.error('Failed to create contact information');
+          console.error('Failed to create contact');
+        }
+      }
+
+      // 3. Create Schedules (matches ScheduleCreate model)
+      for (const schedule of data.schedules || []) {
+        if (schedule.day_of_week && schedule.open_time && schedule.close_time) {
+          const scheduleData = {
+            location_id: locationId,
+            day_of_week: schedule.day_of_week,
+            open_time: schedule.open_time,
+            close_time: schedule.close_time
+          };
+
+          const scheduleResponse = await fetch(`${API_BASE_URL}/schedules`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(scheduleData),
+          });
+
+          if (!scheduleResponse.ok) {
+            console.error('Failed to create schedule');
+          }
+        }
+      }
+
+      // 4. Create FoodOffered (matches FoodOfferedCreate model)
+      if (data.offering_description || data.days_available || data.time_available || data.notes) {
+        const foodData = {
+          location_id: locationId,
+          offering_description: data.offering_description || null,
+          days_available: data.days_available || null,
+          time_available: data.time_available || null,
+          notes: data.notes || null
+        };
+
+        const foodResponse = await fetch(`${API_BASE_URL}/food-offerings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(foodData),
+        });
+
+        if (!foodResponse.ok) {
+          console.error('Failed to create food offering');
         }
       }
 
       setSubmitSuccess(true);
       
-      // Redirect after successful submission
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -136,35 +193,14 @@ export default function RegisterService() {
                 Organization Name *
               </label>
               <input
-                {...register('organizationName', { required: 'Organization name is required' })}
+                {...register('name', { required: 'Organization name is required', maxLength: 255 })}
                 type="text"
-                className={`form-control form-control-lg ${errors.organizationName ? 'is-invalid' : ''}`}
+                className={`form-control form-control-lg ${errors.name ? 'is-invalid' : ''}`}
                 placeholder="Enter your organization name"
                 style={{ borderWidth: '2px' }}
               />
-              {errors.organizationName && (
-                <div className="invalid-feedback">{errors.organizationName.message}</div>
-              )}
-            </div>
-
-            {/* Service Type */}
-            <div className="mb-3">
-              <label className="form-label fw-medium" style={{ color: '#3A3F47' }}>
-                Service Type *
-              </label>
-              <select 
-                {...register('serviceType', { required: 'Service type is required' })}
-                className={`form-select form-select-lg ${errors.serviceType ? 'is-invalid' : ''}`}
-                style={{ borderWidth: '2px' }}
-              >
-                <option value="">Select a service type</option>
-                <option value="food-bank">Food Bank</option>
-                <option value="community-fridge">Community Fridge</option>
-                <option value="meal-program">Meal Program</option>
-                <option value="soup-kitchen">Soup Kitchen</option>
-              </select>
-              {errors.serviceType && (
-                <div className="invalid-feedback">{errors.serviceType.message}</div>
+              {errors.name && (
+                <div className="invalid-feedback">{errors.name.message}</div>
               )}
             </div>
 
@@ -174,19 +210,19 @@ export default function RegisterService() {
                 Address *
               </label>
               <input
-                {...register('street', { required: 'Street address is required' })}
+                {...register('street_address', { required: 'Street address is required', maxLength: 255 })}
                 type="text"
-                className={`form-control form-control-lg mb-2 ${errors.street ? 'is-invalid' : ''}`}
+                className={`form-control form-control-lg mb-2 ${errors.street_address ? 'is-invalid' : ''}`}
                 placeholder="Street address"
                 style={{ borderWidth: '2px' }}
               />
-              {errors.street && (
-                <div className="invalid-feedback d-block mb-2">{errors.street.message}</div>
+              {errors.street_address && (
+                <div className="invalid-feedback d-block mb-2">{errors.street_address.message}</div>
               )}
               <div className="row g-2">
                 <div className="col-6">
                   <input
-                    {...register('city', { required: 'City is required' })}
+                    {...register('city', { required: 'City is required', maxLength: 100 })}
                     type="text"
                     className={`form-control form-control-lg ${errors.city ? 'is-invalid' : ''}`}
                     placeholder="City"
@@ -198,34 +234,73 @@ export default function RegisterService() {
                 </div>
                 <div className="col-6">
                   <input
-                    {...register('postalCode', { required: 'Postal code is required' })}
+                    {...register('postal_code', { required: 'Postal code is required', maxLength: 20 })}
                     type="text"
-                    className={`form-control form-control-lg ${errors.postalCode ? 'is-invalid' : ''}`}
+                    className={`form-control form-control-lg ${errors.postal_code ? 'is-invalid' : ''}`}
                     placeholder="Postal Code"
                     style={{ borderWidth: '2px' }}
                   />
-                  {errors.postalCode && (
-                    <div className="invalid-feedback">{errors.postalCode.message}</div>
+                  {errors.postal_code && (
+                    <div className="invalid-feedback">{errors.postal_code.message}</div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Hours */}
+            {/* Schedule Section */}
             <div className="mb-3">
               <label className="form-label fw-medium" style={{ color: '#3A3F47' }}>
                 Hours of Operation *
               </label>
-              <input
-                {...register('hours', { required: 'Hours of operation are required' })}
-                type="text"
-                className={`form-control form-control-lg ${errors.hours ? 'is-invalid' : ''}`}
-                placeholder="e.g., Mon-Fri 9:00 AM - 5:00 PM"
-                style={{ borderWidth: '2px' }}
-              />
-              {errors.hours && (
-                <div className="invalid-feedback">{errors.hours.message}</div>
-              )}
+              {scheduleFields.map((field, index) => (
+                <div key={field.id} className="row g-2 mb-2 align-items-center">
+                  <div className="col-4">
+                    <select
+                      {...register(`schedules.${index}.day_of_week`, { required: 'Day is required' })}
+                      className="form-select"
+                      style={{ borderWidth: '2px' }}
+                    >
+                      {DAYS_OF_WEEK.map(day => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-3">
+                    <input
+                      {...register(`schedules.${index}.open_time`, { required: 'Open time is required' })}
+                      type="time"
+                      className="form-control"
+                      style={{ borderWidth: '2px' }}
+                    />
+                  </div>
+                  <div className="col-3">
+                    <input
+                      {...register(`schedules.${index}.close_time`, { required: 'Close time is required' })}
+                      type="time"
+                      className="form-control"
+                      style={{ borderWidth: '2px' }}
+                    />
+                  </div>
+                  <div className="col-2">
+                    {scheduleFields.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => removeSchedule(index)}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm mt-2"
+                onClick={() => appendSchedule({ day_of_week: 'Monday', open_time: '09:00', close_time: '17:00' })}
+              >
+                + Add Schedule
+              </button>
             </div>
 
             {/* Contact Phone */}
@@ -234,7 +309,7 @@ export default function RegisterService() {
                 Contact Phone
               </label>
               <input
-                {...register('phone')}
+                {...register('phone_number', { maxLength: 20 })}
                 type="tel"
                 className="form-control form-control-lg"
                 placeholder="(902) 123-4567"
@@ -242,44 +317,90 @@ export default function RegisterService() {
               />
             </div>
 
-            {/* Contact Email */}
+            {/* Website URL */}
             <div className="mb-3">
               <label className="form-label fw-medium" style={{ color: '#3A3F47' }}>
-                Contact Email *
+                Website URL
               </label>
               <input
-                {...register('email', { 
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Invalid email address'
-                  }
-                })}
-                type="email"
-                className={`form-control form-control-lg ${errors.email ? 'is-invalid' : ''}`}
-                placeholder="your@email.com"
+                {...register('website_url')}
+                type="url"
+                className="form-control form-control-lg"
+                placeholder="https://yourwebsite.com"
                 style={{ borderWidth: '2px' }}
               />
-              {errors.email && (
-                <div className="invalid-feedback">{errors.email.message}</div>
-              )}
             </div>
 
             {/* Description */}
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="form-label fw-medium" style={{ color: '#3A3F47' }}>
-                Description *
+                Description
               </label>
               <textarea
-                {...register('description', { required: 'Description is required' })}
-                rows={4}
-                className={`form-control form-control-lg ${errors.description ? 'is-invalid' : ''}`}
-                placeholder="Describe your service and who it serves..."
+                {...register('description')}
+                rows={3}
+                className="form-control form-control-lg"
+                placeholder="Describe your organization..."
                 style={{ borderWidth: '2px', resize: 'none' }}
               />
-              {errors.description && (
-                <div className="invalid-feedback">{errors.description.message}</div>
-              )}
+            </div>
+
+            {/* Food Offered Section */}
+            <div className="mb-3 p-3 border rounded" style={{ backgroundColor: '#f8f9fa' }}>
+              <h6 className="fw-medium mb-3" style={{ color: '#3A3F47' }}>Food Offerings</h6>
+              
+              <div className="mb-2">
+                <label className="form-label small" style={{ color: '#3A3F47' }}>
+                  What food do you offer?
+                </label>
+                <textarea
+                  {...register('offering_description')}
+                  rows={2}
+                  className="form-control"
+                  placeholder="e.g., Fresh produce, canned goods, prepared meals..."
+                  style={{ borderWidth: '2px', resize: 'none' }}
+                />
+              </div>
+
+              <div className="row g-2 mb-2">
+                <div className="col-6">
+                  <label className="form-label small" style={{ color: '#3A3F47' }}>
+                    Days Available
+                  </label>
+                  <input
+                    {...register('days_available')}
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g., Mon, Wed, Fri"
+                    style={{ borderWidth: '2px' }}
+                  />
+                </div>
+                <div className="col-6">
+                  <label className="form-label small" style={{ color: '#3A3F47' }}>
+                    Time Available
+                  </label>
+                  <input
+                    {...register('time_available')}
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g., 9am - 5pm"
+                    style={{ borderWidth: '2px' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="form-label small" style={{ color: '#3A3F47' }}>
+                  Additional Notes
+                </label>
+                <textarea
+                  {...register('notes')}
+                  rows={2}
+                  className="form-control"
+                  placeholder="Any additional information about your food services..."
+                  style={{ borderWidth: '2px', resize: 'none' }}
+                />
+              </div>
             </div>
 
             {/* Submit Buttons */}
