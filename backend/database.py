@@ -5,7 +5,7 @@ import os
 
 # Database connection settings
 DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "84628462")
+DB_PASSWORD = os.getenv("MARIADB_ROOT_PASSWORD", "84628462")
 DB_HOST = os.getenv("DB_HOST", "db")
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "fansdb")
