@@ -10,6 +10,7 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
+      - ./frontend/public:/app/public
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
@@ -24,6 +25,11 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - /app/__pycache__
+    depends_on: 
+      - db
+    networks: 
+      - fans-network
   db:
     image: mariadb:10.11
     container_name: FANS-MariaDB
@@ -35,3 +41,9 @@ services:
       - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+    networks: 
+      - fans-network
+
+networks: 
+  fans-network:
+    driver: bridge
