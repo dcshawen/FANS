@@ -2,10 +2,11 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef } from 'react';
 
+
 function MapComponent({ 
     center = [0, 0], 
     zoom = 1, 
-    style = 'https://demotiles.maplibre.org/globe.json',
+    style = 'https://www.arcgis.com/sharing/rest/content/items/800d755712e8415aab301b9d55bc2800/resources/styles/root.json?f=pjson',
     width = '100%',
     height = '400px',
     maxBounds = [
@@ -13,7 +14,7 @@ function MapComponent({
     [-59.70, 47.64]   // Northeast corner [longitude, latitude]
 ],
     minZoom = 6, 
-    maxZoom = 15
+    maxZoom = 20
 }) {
     const mapContainer = useRef(null);
     const map = useRef(null);

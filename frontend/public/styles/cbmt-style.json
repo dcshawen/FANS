@@ -1,0 +1,49 @@
+{
+  "version": 8,
+  "name": "CBMT Canada",
+  "glyphs": "/fonts/Roboto/{fontstack}/{range}.pbf",
+  "sources": {
+    "cbmt": {
+      "type": "vector",
+      "url": "pmtiles:///tiles/canada-cbmt.pmtiles",
+      "attribution": "© Natural Resources Canada"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#e5e3df"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "cbmt",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#a8d5ff"
+      }
+    },
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "cbmt",
+      "source-layer": "land",
+      "paint": {
+        "fill-color": "#f0e5d8"
+      }
+    },
+    {
+      "id": "roads",
+      "type": "line",
+      "source": "cbmt",
+      "source-layer": "roads",
+      "paint": {
+        "line-color": "#ffcc99",
+        "line-width": 1
+      }
+    }
+  ]
+}
