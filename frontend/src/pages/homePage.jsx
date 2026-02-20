@@ -1,7 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/FANSlogo.png';
-import MapComponent from '../map.jsx';
-import MapComponent from '../map.jsx';
 
 export default function HomePage({ onGetStarted }) {
   const navigate = useNavigate();
@@ -79,16 +77,6 @@ export default function HomePage({ onGetStarted }) {
       </div>
       {/* Map Section */}
       <div style={{ justifyContent: 'center', display: 'flex', marginBottom: '40px', marginTop: '40px', paddingBottom: '40px' }}>
-        <MapComponent 
-        center={[-63.5923, 44.6509]} 
-        zoom={7} 
-        width="600px"
-        height="250px"
-        maxBounds={[
-    [-66.25, 43.38],  // Southwest corner [longitude, latitude]
-    [-59.70, 47.64]   // Northeast corner [longitude, latitude]
-]}
-        />
         
       </div>
       {/* End of map */}

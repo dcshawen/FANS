@@ -11,13 +11,11 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=100
     volumes:
       - ./frontend:/app
       - ./frontend/public:/app/public
       - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - CHOKIDAR_INTERVAL=100
 
   backend:
     build:
@@ -33,6 +31,7 @@ services:
       - db
     networks: 
       - fans-network
+
   db:
     image: mariadb:10.11
     container_name: FANS-MariaDB
@@ -50,36 +49,4 @@ services:
 networks: 
   fans-network:
     driver: bridge
-  db:
-    image: mariadb:10.11
-    container_name: FANS-MariaDB
-    env_file:
-      - ./backend/db.env
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./backend/db_data:/var/lib/mysql
-      - ./backend/initdb:/docker-entrypoint-initdb.d:ro
-    restart: unless-stopped
-      - /app/__pycache__
-    depends_on: 
-      - db
-    networks: 
-      - fans-network
-  db:
-    image: mariadb:10.11
-    container_name: FANS-MariaDB
-    env_file:
-      - ./backend/db.env
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./backend/db_data:/var/lib/mysql
-      - ./backend/initdb:/docker-entrypoint-initdb.d:ro
-    restart: unless-stopped
-    networks: 
-      - fans-network
 
-networks: 
-  fans-network:
-    driver: bridge

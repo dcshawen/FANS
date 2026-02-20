@@ -79,11 +79,15 @@ export default function MapResults() {
         {/* Map Section */}
         <div className="w-100">
           <MapComponent 
-            center={[-63.5752, 44.6488]} // Halifax, Nova Scotia
-            zoom={11}
-            width="100%"
-            height="350px"
-          />
+        center={[-63.5923, 44.6509]} 
+        zoom={12} 
+        width="100%"
+        height="400px"
+        maxBounds={[
+    [-66.25, 43.38],  // Southwest corner [longitude, latitude]
+    [-59.70, 47.64]   // Northeast corner [longitude, latitude]
+]}
+        />
         </div>
 
         {/* Resource Cards Section */}
