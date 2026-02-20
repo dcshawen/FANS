@@ -61,6 +61,11 @@ networks:
       - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+      - /app/__pycache__
+    depends_on: 
+      - db
+    networks: 
+      - fans-network
   db:
     image: mariadb:10.11
     container_name: FANS-MariaDB
@@ -72,3 +77,9 @@ networks:
       - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+    networks: 
+      - fans-network
+
+networks: 
+  fans-network:
+    driver: bridge
