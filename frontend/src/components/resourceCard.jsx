@@ -1,0 +1,119 @@
+export default function ResourceCard({ organization }) {
+  const { name, street_address, city, postal_code, schedules, contacts } = organization;
+
+  // Get contact info from contacts
+  const contact = contacts && contacts.length > 0 ? contacts[0] : null;
+  const phoneNumber = contact?.phone_number;
+  const websiteUrl = contact?.websit_url; // Note: API has typo "websit_url"
+
+  // Format address
+  const formatAddress = () => {
+    const parts = [street_address, city, postal_code].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'Address not available';
+  };
+
+  // Format website URL for display
+  const formatWebsiteDisplay = (url) => {
+    if (!url) return '';
+    return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  };
+
+  // Format time from 24h to 12h format
+  const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  // Order days of week
+  const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  const sortedSchedules = schedules
+    ? [...schedules].sort((a, b) => dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week))
+    : [];
+
+  return (
+    <div className="card shadow rounded-3 overflow-hidden" style={{ border: '2px solid #6A7F5F' }}>
+      {/* Green Header with Organization Name */}
+      <div className="card-header py-2 text-center" style={{ backgroundColor: '#6A7F5F' }}>
+        <h6 className="card-title fw-bold text-white mb-0">
+          {name}
+        </h6>
+      </div>
+
+      <div className="card-body p-3 bg-white">
+        <div className="row">
+          {/* Left Column - Address & Contact */}
+          <div className="col-12 col-md-6">
+            {/* Address */}
+            <div className="mb-2">
+              <div className="d-flex align-items-start">
+                <i className="bi bi-geo-alt-fill me-2 small" style={{ color: '#6A7F5F' }}></i>
+                <p className="mb-0 text-secondary small">
+                  {formatAddress()}
+                </p>
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            {(phoneNumber || websiteUrl) && (
+              <div>
+                {phoneNumber && (
+                  <div className="d-flex align-items-center mb-1">
+                    <i className="bi bi-telephone me-2 small" style={{ color: '#6A7F5F' }}></i>
+                    <a href={`tel:${phoneNumber}`} className="text-secondary text-decoration-none small">
+                      {phoneNumber}
+                    </a>
+                  </div>
+                )}
+                {websiteUrl && (
+                  <div className="d-flex align-items-center">
+                    <i className="bi bi-globe me-2 small" style={{ color: '#6A7F5F' }}></i>
+                    <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-secondary text-decoration-none small text-truncate" style={{ maxWidth: '150px' }}>
+                      {formatWebsiteDisplay(websiteUrl)}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Hours */}
+          <div className="col-12 col-md-6 mt-2 mt-md-0">
+            <div className="d-flex align-items-center mb-1">
+              <i className="bi bi-clock-fill me-2 small" style={{ color: '#6A7F5F' }}></i>
+              <span className="fw-semibold small" style={{ color: '#3A3F47' }}>Hours</span>
+            </div>
+            {sortedSchedules.length > 0 ? (
+              <div className="ps-4">
+                {sortedSchedules.map((schedule, index) => (
+                  <div key={index} className="d-flex justify-content-between" style={{ fontSize: '0.8rem' }}>
+                    <span className="text-secondary">{schedule.day_of_week.slice(0, 3)}</span>
+                    <span className="text-muted">{formatTime(schedule.open_time)} - {formatTime(schedule.close_time)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mb-0 ps-4 text-muted small">
+                Hours not available
+              </p>
+            )}
+            
+            {/* Get Directions Button */}
+            <button 
+              className="btn btn-sm mt-2 d-flex align-items-center justify-content-center gap-1"
+              style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
+              onClick={() => alert('Directions feature coming soon!')}
+            >
+              <i className="bi bi-signpost-2"></i>
+              Get Directions
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
