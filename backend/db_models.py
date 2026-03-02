@@ -34,6 +34,7 @@ class OrganizationDB(Base):
     contacts = relationship("ContactDB", back_populates="organization", cascade="all, delete-orphan")
     schedules = relationship("ScheduleDB", back_populates="organization", cascade="all, delete-orphan")
     food_offerings = relationship("FoodOfferedDB", back_populates="organization", cascade="all, delete-orphan")
+    tags = relationship("TagDB", back_populates="organization", cascade="all, delete-orphan")
 
 
 class ContactDB(Base):
@@ -79,3 +80,13 @@ class FoodOfferedDB(Base):
     
     # Relationships
     organization = relationship("OrganizationDB", back_populates="food_offerings")
+
+class TagDB(Base):
+    __tablename__ = "Tag"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    location_id = Column(Integer, ForeignKey("Organization.location_id", ondelete="CASCADE"), nullable=False)
+    tag = Column(String(255), nullable=False)
+    
+    # Relationships
+    organization = relationship("OrganizationDB", back_populates="tags")
