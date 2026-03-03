@@ -14,7 +14,7 @@ function MapComponent({
         [-59.70, 47.64]
     ],
     minZoom = 6, 
-    maxZoom = 15,
+    maxZoom = 20,
     onMarkerClick = null
 }) {
     const mapContainer = useRef(null);
