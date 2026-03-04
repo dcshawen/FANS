@@ -41,7 +41,7 @@ class ContactDB(Base):
     
     contact_id = Column(Integer, primary_key=True, autoincrement=True)
     location_id = Column(Integer, ForeignKey("Organization.location_id", ondelete="CASCADE"), nullable=False)
-    phone_number = Column(String(20))
+    phone_number = Column(String(30))
     websit_url = Column(String(500))
     created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
