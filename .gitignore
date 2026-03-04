@@ -57,6 +57,26 @@ MANIFEST
 *.manifest
 *.spec
 
+# Geospatial source files (too large)
+*.geojson
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.osm.pbf
+*.zip
+
+# Geospatial source files (too large)
+*.geojson
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.osm.pbf
+*.zip
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -382,3 +402,161 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
+backend/data/tmp/
+backend/data/sources/
+backend/data/processed/*.pmtiles
+
+# Keep PMTiles in git (it's the final output)
+!backend/data/processed/canada-cbmt.pmtiles
+!frontend/public/tiles/canada-cbmt.pmtiles
+
+# Misc
+*.bat
+*.jar
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
+backend/data/tmp/
+backend/data/sources/
+backend/data/processed/*.pmtiles
+
+# Keep PMTiles in git (it's the final output)
+!backend/data/processed/canada-cbmt.pmtiles
+!frontend/public/tiles/canada-cbmt.pmtiles
+
+# Misc
+*.bat
+*.jar
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
+# Environment variables (contains credentials)
+backend/db.env
+
+# Dependencies
+node_modules/
+__pycache__/
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+backend/db_data/
+backend/data/tmp/
+backend/data/sources/
+backend/data/processed/*.pmtiles
+
+# Keep PMTiles in git (it's the final output)
+!backend/data/processed/canada-cbmt.pmtiles
+!frontend/public/tiles/canada-cbmt.pmtiles
+
+# Misc
+*.bat
+*.jar

@@ -25,6 +25,8 @@ services:
       - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+    networks:
+      - fans-network
 
   backend:
     build:
@@ -35,3 +37,14 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - /app/__pycache__
+    depends_on: 
+      - db
+    networks: 
+      - fans-network
+
+networks: 
+  fans-network:
+    driver: bridge
+
+

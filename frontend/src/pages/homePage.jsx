@@ -75,7 +75,11 @@ export default function HomePage({ onGetStarted }) {
           </button>
         </div>
       </div>
-
+      {/* Map Section */}
+      <div style={{ justifyContent: 'center', display: 'flex', marginBottom: '40px', marginTop: '40px', paddingBottom: '40px' }}>
+        
+      </div>
+      {/* End of map */}
     </div>
   );
 }
