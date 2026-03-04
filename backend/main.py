@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 from models import (
-    Organization, OrganizationCreate, OrganizationSummary,
+    Organization, OrganizationCreate,
     Contact, ContactCreate,
     Schedule, ScheduleCreate,
     FoodOffered, FoodOfferedCreate
@@ -42,9 +42,9 @@ def get_status():
 
 # ==================== ORGANIZATION ENDPOINTS ====================
 
-@app.get("/organizations", response_model=List[OrganizationSummary], tags=["Organizations"])
+@app.get("/organizations", response_model=List[Organization], tags=["Organizations"])
 def get_all_organizations(db: Session = Depends(get_db)):
-    """Get all organizations (without nested relationships)"""
+    """Get all organizations with full details (contacts, schedules, food offerings)"""
     return db.query(OrganizationDB).all()
 
 
