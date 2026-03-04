@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `Organization` (
 CREATE TABLE IF NOT EXISTS `Contact` (
   `contact_id` INT PRIMARY KEY AUTO_INCREMENT,
   `location_id` INT NOT NULL,
-  `phone_number` VARCHAR(20),
+  `phone_number` VARCHAR(30),
   `websit_url` VARCHAR(500),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -419,6 +419,3 @@ VALUES
 (@org,'Friday','00:00','23:59'),
 (@org,'Saturday','00:00','23:59'),
 (@org,'Sunday','00:00','23:59');
-food_insert_SQL.txt
-food_insert_SQL.txt (16 KB)
-16 KB

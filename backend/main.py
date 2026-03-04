@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from typing import List
 from models import (
     Organization, OrganizationCreate,
@@ -45,13 +45,30 @@ def get_status():
 @app.get("/organizations", response_model=List[Organization], tags=["Organizations"])
 def get_all_organizations(db: Session = Depends(get_db)):
     """Get all organizations with full details (contacts, schedules, food offerings)"""
-    return db.query(OrganizationDB).all()
+    return (
+        db.query(OrganizationDB)
+        .options(
+            selectinload(OrganizationDB.contacts),
+            selectinload(OrganizationDB.schedules),
+            selectinload(OrganizationDB.food_offerings),
+        )
+        .all()
+    )
 
 
 @app.get("/organizations/{location_id}", response_model=Organization, tags=["Organizations"])
 def get_organization(location_id: int, db: Session = Depends(get_db)):
     """Get a specific organization by ID (with nested relationships)"""
-    org = db.query(OrganizationDB).filter(OrganizationDB.location_id == location_id).first()
+    org = (
+        db.query(OrganizationDB)
+        .options(
+            selectinload(OrganizationDB.contacts),
+            selectinload(OrganizationDB.schedules),
+            selectinload(OrganizationDB.food_offerings),
+        )
+        .filter(OrganizationDB.location_id == location_id)
+        .first()
+    )
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
     return org

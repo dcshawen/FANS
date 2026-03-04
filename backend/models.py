@@ -18,7 +18,7 @@ class DayOfWeek(str, Enum):
 class ContactBase(BaseModel):
     """Base model for Contact"""
     location_id: int = Field(..., description="Foreign key to Organization")
-    phone_number: Optional[str] = Field(None, max_length=20, description="Contact phone number")
+    phone_number: Optional[str] = Field(None, max_length=30, description="Contact phone number")
     websit_url: Optional[HttpUrl] = Field(None, description="Website URL")
 
 
