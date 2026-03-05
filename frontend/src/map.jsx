@@ -3,6 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
 import './map.css';
+import { set } from 'react-hook-form';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -24,7 +25,7 @@ function MapComponent({
     const mapInitialized = useRef(false);
     const [userLocation, setUserLocation] = useState(null);
     const [selectedMarker, setSelectedMarker] = useState(null);
-    const [markers, setMarkers] = useState([]);
+    const [organizations, setOrganizations] = useState([]);
     const userMarkerRef = useRef(false);
     const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -97,6 +98,7 @@ function MapComponent({
                 console.log('Style loaded, initializing map...');
                 initializeMap(styleJson);
             } catch (error) {
+                // Fallback style in case PMTiles fails
                 console.error('Error loading style:', error);
                 initializeMap('https://demotiles.maplibre.org/style.json');
             }
@@ -116,6 +118,7 @@ function MapComponent({
             map.current.on('load', () => {
                 console.log('Map loaded, setting up layers...');
                 setupMapLayers();
+                setMapLoaded(true);
             });
 
             map.current.on('error', (e) => {
@@ -126,6 +129,7 @@ function MapComponent({
         };
 
         const setupMapLayers = () => {
+            // User location source and layer
             if (!map.current.getSource('user-location')) {
                 map.current.addSource('user-location', {
                     type: 'geojson',
@@ -146,12 +150,14 @@ function MapComponent({
                 });
             }
 
+            // Resource marker source and layers
             if (!map.current.getSource('food-markers')) {
                 map.current.addSource('food-markers', {
                     type: 'geojson',
                     data: { type: 'FeatureCollection', features: [] }
                 });
 
+                // Marker circles
                 map.current.addLayer({
                     id: 'food-marker-layer',
                     type: 'circle',
@@ -164,31 +170,54 @@ function MapComponent({
                     }
                 });
 
+                // Marker layers
                 map.current.addLayer({
                     id: 'food-marker-labels',
                     type: 'symbol',
                     source: 'food-markers',
                     layout: {
                         'text-field': ['get', 'name'],
-                        'text-size': 12,
+                        'text-size': 11,
                         'text-offset': [0, 1.5],
-                        'text-anchor': 'top'
+                        'text-anchor': 'top',
+                        'text-max-width': 10
                     },
                     paint: {
                         'text-color': '#3A3F47',
                         'text-halo-color': '#fff',
-                        'text-halo-width': 1
+                        'text-halo-width': 2
                     }
                 });
 
+                // Click handling
                 map.current.on('click', 'food-marker-layer', (e) => {
                     const feature = e.features[0];
-                    setSelectedMarker(feature.properties);
+                    const props = feature.properties;
+
+                    // Parse JSON strings to objects if needed
+                    const markerData = {
+                        ...props,
+                        // Parse stringified JSON fields
+                        schedules: typeof props.schedules === 'string'
+                        ? JSON.parse(props.schedules)
+                        : props.schedules
+                    };
+
+
+                    setSelectedMarker(markerData);
+
                     if (onMarkerClick) {
-                        onMarkerClick(feature.properties);
+                        onMarkerClick(markerData);
                     }
+
+                    // Center on selected marker
+                    map.current.flyTo({
+                        center: feature.geometry.coordinates,
+                        zoom: Math.max(map.current.getZoom(), 13),
+                    });
                 });
 
+                // Cursor change on hover
                 map.current.on('mouseenter', 'food-marker-layer', () => {
                     map.current.getCanvas().style.cursor = 'pointer';
                 });
@@ -212,7 +241,7 @@ function MapComponent({
 
     // Update user location marker
     useEffect(() => {
-        if (!userLocation || !map.current || !map.current.isStyleLoaded()) return;
+        if (!userLocation || !map.current || !mapLoaded) return;
 
         map.current.getSource('user-location')?.setData({
             type: 'FeatureCollection',
@@ -231,40 +260,51 @@ function MapComponent({
             });
             userMarkerRef.current = true;
         }
-    }, [userLocation]);
+    }, [userLocation, mapLoaded]);
 
-    // Add markers from database
-    const addMarkers = (organizationData) => {
-        if (!map.current || !map.current.isStyleLoaded()) return;
+    // Add markers from database once loaded
+    useEffect(() => {
+        if (!mapLoaded || organizations.length === 0) return;
 
-        const features = organizationData.map(org => ({
+        const source = map.current.getSource('food-markers');
+        if (!source) return;
+
+        const features = organizations.map(org => ({
             type: 'Feature',
             geometry: {
                 type: 'Point',
                 coordinates: [org.longitude, org.latitude]
-            },
-            properties: {
-                location_id: org.location_id,
+        }, 
+        properties: {
+            location_id: org.location_id,
                 name: org.name,
-                description: org.description,
-                street_address: org.street_address,
-                city: org.city,
-                postal_code: org.postal_code,
-                phone: org.phone_number,
-                website: org.website_url,
-                hours: org.hours,
-                food_offerings: org.food_offerings
-            }
-        }));
+                description: org.description || '',
+                street_address: org.street_address || '',
+                city: org.city || '',
+                postal_code: org.postal_code || '',
+                latitude: org.latitude,
+                longitude: org.longitude,
+                // Include related data
+                contacts: JSON.stringify(org.contacts || []),
+                schedules: JSON.stringify(org.schedules || [])
+        }
 
-        map.current.getSource('food-markers')?.setData({
-            type: 'FeatureCollection',
-            features: features
-        });
+    }));
 
-        setMarkers(organizationData);
-    };
+    source.setData({
+        type: 'FeatureCollection', 
+        features: features
+    });
 
+    console.log(`Added ${features.length} markers to map.`)
+    // Fit bounds to show all markers
+    if (features.length > 1 && !userLocation) {
+        const bounds = new maplibregl.LngLatBounds();
+        features.forEach(f => bounds.extend(f.geometry.coordinates));
+        map.current.fitBounds(bounds, { padding: 50, maxZoom: 12});
+    }
+}, [organizations, mapLoaded])
+    
     // Recenter map
     const handleCenter = () => {
         if (map.current && userLocation) {
@@ -276,12 +316,17 @@ function MapComponent({
         }
     };
 
+    const closePopup = () => {
+        setSelectedMarker(null);
+    }
+
     return (
         <div style={{ position: 'relative', width, height }}>
             <div
                 ref={mapContainer}
                 style={{ width, height }}
             />
+            {/* Recenter button */}
             <button
                 className="map-recenter-btn"
                 title="Return to your location"
@@ -290,23 +335,33 @@ function MapComponent({
                 📍 My Location
             </button>
 
+            {/* Selected Marker Popup handle */}
             {selectedMarker && (
                 <div className="map-popup">
-                    <button
-                        className="popup-close"
-                        onClick={() => setSelectedMarker(null)}
-                    >
-                        ×
-                    </button>
+                    <button className="popup-close" onClick={closePopup}>×</button>
+                    
                     <h3>{selectedMarker.name}</h3>
-                    <p className="popup-description">{selectedMarker.description}</p>
+                    {selectedMarker.description && (
+                        <p className="popup-description">{selectedMarker.description}</p>
+                    )}
                     <div className="popup-details">
-                        <p><strong>📍</strong> {selectedMarker.street_address}, {selectedMarker.city} {selectedMarker.postal_code}</p>
-                        <p><strong>📞</strong> <a href={`tel:${selectedMarker.phone}`}>{selectedMarker.phone}</a></p>
-                        {selectedMarker.website && (
-                            <p><strong>🌐</strong> <a href={selectedMarker.website} target="_blank" rel="noopener noreferrer">Visit Website</a></p>
+                        <p>
+                            <strong>📍</strong> {selectedMarker.street_address}, {selectedMarker.city} {selectedMarker.postal_code}
+                        </p>  
+                        {/* Display schedules if available */}
+                        {selectedMarker.schedules && selectedMarker.schedules.length > 0 && (
+                            <div className="popup-schedules">
+                                <strong>🕐 Hours:</strong>
+                                {selectedMarker.schedules.map((schedule, idx) => (
+                                    <p key={idx}>
+                                        {schedule.day_of_week}: {schedule.open_time} - {schedule.close_time}
+                                    </p>
+                                ))}
+                            </div>
                         )}
                     </div>
+
+                    {/* Directions button logic to be implemented later */}
                     <button
                         className="popup-directions-btn"
                         onClick={() => {
