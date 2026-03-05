@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `Organization` (
 CREATE TABLE IF NOT EXISTS `Contact` (
   `contact_id` INT PRIMARY KEY AUTO_INCREMENT,
   `location_id` INT NOT NULL,
-  `phone_number` VARCHAR(30),
+  `phone_number` VARCHAR(20),
   `websit_url` VARCHAR(500),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -157,9 +157,9 @@ VALUES
 
 
 -- Community Fridges (multiple sites)
--- ('Community Fridges',
---  'Free food access pantry — take what you need, leave what you can.',
---  'Multiple locations', 'Halifax/Dartmouth, NS', NULL, NULL, NULL);
+('Community Fridges',
+ 'Free food access pantry — take what you need, leave what you can.',
+ 'Multiple locations', 'Halifax/Dartmouth, NS', NULL, NULL, NULL);
 
 
 -- =========================
@@ -251,8 +251,8 @@ SELECT location_id, '902-422-1598', 'https://salvationarmy.ca/you-can-bring-hope
 
 
 -- Community Fridges
--- INSERT INTO `Contact` (`location_id`, `phone_number`, `websit_url`)
--- SELECT location_id, NULL, 'https://www.communityfridgehfx.com/' FROM `Organization` WHERE `name`='Community Fridges';
+INSERT INTO `Contact` (`location_id`, `phone_number`, `websit_url`)
+SELECT location_id, NULL, 'https://www.communityfridgehfx.com/' FROM `Organization` WHERE `name`='Community Fridges';
 
 
 
@@ -409,13 +409,16 @@ VALUES
 (@org,'Friday','09:00','15:00');
 
 -- Community Fridges (24/7 -> 00:00–23:59 all seven days)
--- SET @org := (SELECT location_id FROM `Organization` WHERE `name`='Community Fridges');
--- INSERT INTO `Schedule` (`location_id`, `day_of_week`, `open_time`, `close_time`)
--- VALUES
--- (@org,'Monday','00:00','23:59'),
--- (@org,'Tuesday','00:00','23:59'),
--- (@org,'Wednesday','00:00','23:59'),
--- (@org,'Thursday','00:00','23:59'),
--- (@org,'Friday','00:00','23:59'),
--- (@org,'Saturday','00:00','23:59'),
--- (@org,'Sunday','00:00','23:59');
+SET @org := (SELECT location_id FROM `Organization` WHERE `name`='Community Fridges');
+INSERT INTO `Schedule` (`location_id`, `day_of_week`, `open_time`, `close_time`)
+VALUES
+(@org,'Monday','00:00','23:59'),
+(@org,'Tuesday','00:00','23:59'),
+(@org,'Wednesday','00:00','23:59'),
+(@org,'Thursday','00:00','23:59'),
+(@org,'Friday','00:00','23:59'),
+(@org,'Saturday','00:00','23:59'),
+(@org,'Sunday','00:00','23:59');
+food_insert_SQL.txt
+food_insert_SQL.txt (16 KB)
+16 KB
