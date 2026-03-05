@@ -18,27 +18,14 @@ export default function MapResults() {
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
-      // First get all organizations (summary)
       const response = await fetch(`${API_BASE_URL}/organizations`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch organizations');
       }
       
-      const summaryList = await response.json();
-      
-      // Fetch full details for each organization (includes schedules)
-      const fullOrganizations = await Promise.all(
-        summaryList.map(async (org) => {
-          const detailResponse = await fetch(`${API_BASE_URL}/organizations/${org.location_id}`);
-          if (detailResponse.ok) {
-            return detailResponse.json();
-          }
-          return org;
-        })
-      );
-      
-      setOrganizations(fullOrganizations);
+      const organizations = await response.json();
+      setOrganizations(organizations);
     } catch (err) {
       console.error('Error fetching organizations:', err);
       setError(err.message);
