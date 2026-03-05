@@ -1,5 +1,5 @@
 export default function ResourceCard({ organization }) {
-  const { name, street_address, city, postal_code, schedules, contacts } = organization;
+  const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
 
   // Get contact info from contacts
   const contact = contacts && contacts.length > 0 ? contacts[0] : null;
@@ -45,6 +45,32 @@ export default function ResourceCard({ organization }) {
       </div>
 
       <div className="card-body p-3 bg-white">
+        {/* Placeholder Tags */}
+        <div className="mb-3">
+          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+            Hot Meals
+          </span>
+          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+            Lunch Service
+          </span>
+          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+            Community
+          </span>
+        </div>
+        {/* Tags */}
+        {tags && tags.length > 0 && (
+          <div className="mb-3">
+            {tags.map((tag, index) => (
+              <span 
+                key={index} 
+                className="badge me-2 mb-1"
+                style={{ backgroundColor: '#6A7F5F' }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="row">
           {/* Left Column - Address & Contact */}
           <div className="col-12 col-md-6">
