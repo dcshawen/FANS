@@ -1,15 +1,20 @@
+import httpx
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from typing import List
+from pydantic import BaseModel
 from models import (
-    Organization, OrganizationCreate, OrganizationSummary,
+    Organization, OrganizationCreate,
     Contact, ContactCreate,
     Schedule, ScheduleCreate,
     FoodOffered, FoodOfferedCreate
 )
 from db_models import OrganizationDB, ContactDB, ScheduleDB, FoodOfferedDB
 from database import get_db
+
+class GeocodeRequest(BaseModel):
+    addresses: list[str]
 
 app = FastAPI(
     title="Food Access Nova Scotia API",
@@ -26,7 +31,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173", 
+        "http://localhost:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
@@ -41,16 +47,33 @@ def get_status():
 
 # ==================== ORGANIZATION ENDPOINTS ====================
 
-@app.get("/organizations", response_model=List[OrganizationSummary], tags=["Organizations"])
+@app.get("/organizations", response_model=List[Organization], tags=["Organizations"])
 def get_all_organizations(db: Session = Depends(get_db)):
-    """Get all organizations (without nested relationships)"""
-    return db.query(OrganizationDB).all()
+    """Get all organizations with full details (contacts, schedules, food offerings)"""
+    return (
+        db.query(OrganizationDB)
+        .options(
+            selectinload(OrganizationDB.contacts),
+            selectinload(OrganizationDB.schedules),
+            selectinload(OrganizationDB.food_offerings),
+        )
+        .all()
+    )
 
 
 @app.get("/organizations/{location_id}", response_model=Organization, tags=["Organizations"])
 def get_organization(location_id: int, db: Session = Depends(get_db)):
     """Get a specific organization by ID (with nested relationships)"""
-    org = db.query(OrganizationDB).filter(OrganizationDB.location_id == location_id).first()
+    org = (
+        db.query(OrganizationDB)
+        .options(
+            selectinload(OrganizationDB.contacts),
+            selectinload(OrganizationDB.schedules),
+            selectinload(OrganizationDB.food_offerings),
+        )
+        .filter(OrganizationDB.location_id == location_id)
+        .first()
+    )
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
     return org
@@ -306,3 +329,66 @@ def delete_food_offering(offering_id: int, db: Session = Depends(get_db)):
     
     db.delete(db_food)
     db.commit()
+
+# --------------------- Geocod.io endpoints ---------------------
+
+@app.put("/organizations/{location_id}/geocode", tags=["Geocoding"]) 
+def update_org_coords(location_id: int, lat: float, lng: float, db: Session = Depends(get_db)):
+    """Update Organization Coordinates"""
+    org = db.query(OrganizationDB).filter(OrganizationDB.location_id == location_id).first()
+    if not org: 
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    org.latitude = lat
+    org.longitude = lng
+    db.commit()
+    return org
+
+@app.post("/geocode/batch", tags=["Geocoding"])
+async def geocode_batch(addresses: list[str]):
+    """Proxy batch geocoding requests to Geocod.io API"""
+    import os
+    api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
+    
+    try:
+        async with httpx.AsyncClient() as client: 
+            response = await client.post(
+                f"https://api.geocod.io/v1.7/geocode",
+                params={"api_key": api_key},
+                json=addresses,
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"Geocodio error: {response.text}"
+                )
+            
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
+    
+@app.get("/geocode/single", tags=["Geocoding"])
+async def geocode_single(address: str):
+    """Proxy single geocoding requests to Geocod.io API"""
+    import os
+    api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
+
+    try:
+        async with httpx.AsyncClient() as client: 
+            response = await client.get(
+                f"https://api.geocod.io/v1.7/geocode",
+                params={"api_key": api_key, "q": address},
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"Geocodio error: {response.text}"
+                )
+            
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
