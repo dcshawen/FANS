@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ResourceCard from '../components/resourceCard';
+import ListCard from '../components/listcard';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -108,7 +108,7 @@ export default function ResourcesList() {
             <div className="row g-4">
               {organizations.map((org) => (
                 <div key={org.location_id} className="col-12 col-md-6">
-                  <ResourceCard organization={org} />
+                  <ListCard organization={org} />
                 </div>
               ))}
             </div>

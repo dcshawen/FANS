@@ -57,36 +57,37 @@ export default function ResourceCard({ organization }) {
         </h6>
       </div>
 
-      <div className="card-body p-3 bg-white">
-        {/* Placeholder Tags */}
-        <div className="mb-3">
-          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-            Hot Meals
-          </span>
-          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-            Lunch Service
-          </span>
-          <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-            Community
-          </span>
-        </div>
-        {/* Tags */}
-        {tags && tags.length > 0 && (
-          <div className="mb-3">
-            {tags.map((tag, index) => (
-              <span 
-                key={index} 
-                className="badge me-2 mb-1"
-                style={{ backgroundColor: '#6A7F5F' }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="card-body p-4 bg-white">
         <div className="row">
-          {/* Left Column - Address & Contact */}
-          <div className="col-12 col-md-6">
+          {/* Left Column - Tags, Address & Contact */}
+          <div className="col-12 col-md-6 d-flex flex-column align-items-center align-items-md-start ps-md-5">
+            {/* Placeholder Tags */}
+            <div className="mb-3">
+              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+                Hot Meals
+              </span>
+              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+                Lunch Service
+              </span>
+              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
+                Community
+              </span>
+            </div>
+            {/* Tags */}
+            {tags && tags.length > 0 && (
+              <div className="mb-3">
+                {tags.map((tag, index) => (
+                  <span 
+                    key={index} 
+                    className="badge me-2 mb-1"
+                    style={{ backgroundColor: '#6A7F5F' }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            
             {/* Address */}
             <div className="mb-2">
               <div className="d-flex align-items-start">
@@ -121,8 +122,8 @@ export default function ResourceCard({ organization }) {
           </div>
 
           {/* Right Column - Hours */}
-          <div className="col-12 col-md-6 mt-2 mt-md-0">
-            <div className="d-flex align-items-center mb-1">
+          <div className="col-12 col-md-6 mt-3 mt-md-0">
+            <div className="d-flex align-items-center mb-2">
               <i className="bi bi-clock-fill me-2 small" style={{ color: '#6A7F5F' }}></i>
               <span className="fw-semibold small" style={{ color: '#3A3F47' }}>Hours</span>
             </div>
@@ -147,17 +148,19 @@ export default function ResourceCard({ organization }) {
                 Hours not available
               </p>
             )}
-            
-            {/* Get Directions Button */}
-            <button 
-              className="btn btn-sm mt-2 d-flex align-items-center justify-content-center gap-1"
-              style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
-              onClick={() => alert('Directions feature coming soon!')}
-            >
-              <i className="bi bi-signpost-2"></i>
-              Get Directions
-            </button>
           </div>
+        </div>
+        
+        {/* Get Directions Button - Centered at bottom of card */}
+        <div className="d-flex justify-content-center mt-3">
+          <button 
+            className="btn btn-sm d-flex align-items-center justify-content-center gap-1"
+            style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
+            onClick={() => alert('Directions feature coming soon!')}
+          >
+            <i className="bi bi-signpost-2"></i>
+            Get Directions
+          </button>
         </div>
       </div>
     </div>
