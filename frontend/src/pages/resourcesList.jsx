@@ -54,7 +54,7 @@ export default function ResourcesList() {
     <div className="min-vh-100 d-flex flex-column" style={{ backgroundColor: '#FFF8F0' }}>
       {/* Header */}
       <header className="text-white p-3 p-md-4 shadow-sm" style={{ backgroundColor: '#6A7F5F' }}>
-        <div className="container">
+        <div className="container" style={{ maxWidth: '1100px' }}>
           <div className="d-flex align-items-center justify-content-between">
             <button 
               onClick={handleBack}
