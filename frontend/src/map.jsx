@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
 import './map.css';
 
+const API_BASE_URL = 'http://localhost:8000';
+
 function MapComponent({ 
     center = [-63.5923, 44.6509],
     zoom = 8,
@@ -24,6 +26,7 @@ function MapComponent({
     const [selectedMarker, setSelectedMarker] = useState(null);
     const [markers, setMarkers] = useState([]);
     const userMarkerRef = useRef(false);
+    const [mapLoaded, setMapLoaded] = useState(false);
 
     // Initialize PMTiles protocol FIRST
     useEffect(() => {
@@ -40,6 +43,29 @@ function MapComponent({
             }
         };
     }, []);
+
+    // Get organization data for map markers
+    useEffect(() => {
+        const fetchOrganizations = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/organizations`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch organizations');
+                }
+                // Only keep organizations with coords
+                const data = await response.json();
+                const geocoded = data.filter(org => 
+                    org.latitude != null && 
+                    org.longitude != null
+                );
+                console.log(`Collected ${geocoded.length} locations.`)
+                setOrganizations(geocoded);
+            } catch (error) {
+                console.error('Error collecting locations: ', error);
+            }
+        };
+        fetchOrganizations();
+    }, [])
 
     // Get geolocation
     useEffect(() => {
@@ -200,7 +226,7 @@ function MapComponent({
         if (!userMarkerRef.current) {
             map.current.flyTo({
                 center: userLocation,
-                zoom: 10,
+                zoom: 12,
                 duration: 1500
             });
             userMarkerRef.current = true;
@@ -244,7 +270,7 @@ function MapComponent({
         if (map.current && userLocation) {
             map.current.flyTo({
                 center: userLocation,
-                zoom: 10,
+                zoom: 14,
                 duration: 1000
             });
         }
