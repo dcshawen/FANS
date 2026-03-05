@@ -2,6 +2,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import logo from '../assets/FANSlogo.png';
+import { geocodeSingleAddress } from '../utils/geocodeService';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -58,6 +59,21 @@ export default function RegisterService() {
       const createdOrg = await orgResponse.json();
       const locationId = createdOrg.location_id;
       console.log('Organization created:', createdOrg);
+
+      // 1.5 Geocode the address to get coordinates
+      if (data.street_address && data.city && data.postal_code) {
+        console.log('Geocoding new organization address...')
+        const coords = await geocodeSingleAddress(
+          locationId, 
+          data.street_address, 
+          data.city, 
+          data.postal_code);
+          if (coords) {
+            console.log(`Geocoding successful: (${coords.lat}, ${coords.lng})`);
+          } else {
+            console.warn('Geocoding failed for the provided address.');
+          }
+      }
 
       // 2. Create Contact (matches ContactCreate model)
       if (data.phone_number || data.website_url) {

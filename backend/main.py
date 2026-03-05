@@ -1,3 +1,4 @@
+import httpx
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -307,3 +308,45 @@ def delete_food_offering(offering_id: int, db: Session = Depends(get_db)):
     
     db.delete(db_food)
     db.commit()
+
+# --------------------- Geocod.io endpoints ---------------------
+
+@app.put("/organizations/{location_id}/geocode", tags=["Geocoding"]) 
+def update_org_coords(location_id: int, lat: float, lng: float, db: Session = Depends(get_db)):
+    """Update Organization Coordinates"""
+    org = db.query(OrganizationDB).filter(OrganizationDB.location_id == location_id).first()
+    if not org: 
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    org.latitude = lat
+    org.longitude = lng
+    db.commit()
+    return org
+
+@app.post("/geocode/batch", tags=["Geocoding"])
+async def geocode_batch(address: list[str]):
+    """Proxy batch geocoding requests to Geocod.io API"""
+    import os
+    api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
+
+    async with httpx.AsyncClient() as client: 
+        response = await client.post(
+            f"https://api.geocodio.com/v1.7/geocode?api_key={api_key}",
+            json={"addresses": address}
+            timeout=30.0
+        )
+        return response.json()
+    
+@app.get("/geocode/single", tags=["Geocoding"])
+async def geocode_single(address: str):
+    """Proxy single geocoding requests to Geocod.io API"""
+    import os
+    api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
+
+    async with httpx.AsyncClient() as client: 
+        response = await client.get(
+            f"https://api.geocodio.com/v1.7/geocode",
+            params = {"api_key": api_key, "q": address},
+            timeout=30.0
+        )
+        return response.json()
