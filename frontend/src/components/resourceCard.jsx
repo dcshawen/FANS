@@ -35,6 +35,19 @@ export default function ResourceCard({ organization }) {
     ? [...schedules].sort((a, b) => dayOrder.indexOf(a.day_of_week) - dayOrder.indexOf(b.day_of_week))
     : [];
 
+  // Group schedules by day
+  const groupedSchedules = sortedSchedules.reduce((acc, schedule) => {
+    const day = schedule.day_of_week;
+    if (!acc[day]) {
+      acc[day] = [];
+    }
+    acc[day].push({
+      open: schedule.open_time,
+      close: schedule.close_time
+    });
+    return acc;
+  }, {});
+
   return (
     <div className="card shadow rounded-3 overflow-hidden" style={{ border: '2px solid #6A7F5F' }}>
       {/* Green Header with Organization Name */}
@@ -113,12 +126,19 @@ export default function ResourceCard({ organization }) {
               <i className="bi bi-clock-fill me-2 small" style={{ color: '#6A7F5F' }}></i>
               <span className="fw-semibold small" style={{ color: '#3A3F47' }}>Hours</span>
             </div>
-            {sortedSchedules.length > 0 ? (
+            {Object.keys(groupedSchedules).length > 0 ? (
               <div className="ps-4">
-                {sortedSchedules.map((schedule, index) => (
-                  <div key={index} className="d-flex justify-content-between" style={{ fontSize: '0.8rem' }}>
-                    <span className="text-secondary">{schedule.day_of_week.slice(0, 3)}</span>
-                    <span className="text-muted">{formatTime(schedule.open_time)} - {formatTime(schedule.close_time)}</span>
+                {Object.entries(groupedSchedules).map(([day, times], index) => (
+                  <div key={index} className="d-flex" style={{ fontSize: '0.8rem', gap: '0.5rem' }}>
+                    <span className="text-secondary" style={{ minWidth: '70px' }}>{day}</span>
+                    <span className="text-muted">
+                      {times.map((t, i) => (
+                        <span key={i}>
+                          {i > 0 && ' and '}
+                          {formatTime(t.open)} - {formatTime(t.close)}
+                        </span>
+                      ))}
+                    </span>
                   </div>
                 ))}
               </div>
