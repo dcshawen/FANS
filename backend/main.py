@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import BaseModel
 from models import (
     Organization, OrganizationCreate, OrganizationSummary,
     Contact, ContactCreate,
@@ -11,6 +12,9 @@ from models import (
 )
 from db_models import OrganizationDB, ContactDB, ScheduleDB, FoodOfferedDB
 from database import get_db
+
+class GeocodeRequest(BaseModel):
+    addresses: list[str]
 
 app = FastAPI(
     title="Food Access Nova Scotia API",
@@ -324,18 +328,29 @@ def update_org_coords(location_id: int, lat: float, lng: float, db: Session = De
     return org
 
 @app.post("/geocode/batch", tags=["Geocoding"])
-async def geocode_batch(address: list[str]):
+async def geocode_batch(addresses: list[str]):
     """Proxy batch geocoding requests to Geocod.io API"""
     import os
     api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
-
-    async with httpx.AsyncClient() as client: 
-        response = await client.post(
-            f"https://api.geocodio.com/v1.7/geocode?api_key={api_key}",
-            json={"addresses": address}
-            timeout=30.0
-        )
-        return response.json()
+    
+    try:
+        async with httpx.AsyncClient() as client: 
+            response = await client.post(
+                f"https://api.geocod.io/v1.7/geocode",
+                params={"api_key": api_key},
+                json=addresses,
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"Geocodio error: {response.text}"
+                )
+            
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")
     
 @app.get("/geocode/single", tags=["Geocoding"])
 async def geocode_single(address: str):
@@ -343,10 +358,20 @@ async def geocode_single(address: str):
     import os
     api_key = os.environ.get("GEOCODIO_API_KEY", "a6a95a46f369a3aa69fa965936af56569aaa6a3")
 
-    async with httpx.AsyncClient() as client: 
-        response = await client.get(
-            f"https://api.geocodio.com/v1.7/geocode",
-            params = {"api_key": api_key, "q": address},
-            timeout=30.0
-        )
-        return response.json()
+    try:
+        async with httpx.AsyncClient() as client: 
+            response = await client.get(
+                f"https://api.geocod.io/v1.7/geocode",
+                params={"api_key": api_key, "q": address},
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"Geocodio error: {response.text}"
+                )
+            
+            return response.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Request failed: {str(e)}")

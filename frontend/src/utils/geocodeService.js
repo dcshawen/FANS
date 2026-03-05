@@ -1,6 +1,3 @@
-import axios from 'axios';
-
-const GEOCODIO_API_KEY = import.meta.env.VITE_GEOCODIO_API_KEY;
 const API_BASE_URL = 'http://localhost:8000';
 const BATCH_SIZE = 10;
 
@@ -10,8 +7,12 @@ export async function geocodeAddresses() {
     const response = await fetch(`${API_BASE_URL}/organizations`);
     const orgs = await response.json();
 
-    // Filter only organizations missing coordinates
-    const ungeocoded = orgs.filter(org => !org.latitude || !org.longitude);
+    // Filter only organizations missing coordinates and existing address data
+    const ungeocoded = orgs.filter(org => 
+      (!org.latitude || !org.longitude) && 
+      org.street_address && 
+      org.city // Postal code optional, Geocodio can make a good guess with just these fields
+    );
 
     if (ungeocoded.length === 0) {
       console.log('✓ All addresses already geocoded!');
@@ -35,31 +36,37 @@ export async function geocodeAddresses() {
 // Format: 2107 Brunswick St, Halifax, NS, B3K, Canada
 async function geocodeBatch(addresses) {
   const queries = addresses.map(addr => 
-    `${addr.street_address}, ${addr.city}, ${addr.postal_code}, Canada`
+    `${addr.street_address}, ${addr.city}, ${addr.postal_code || ''}, Canada`
   );
 
   try {
-    const response = await axios.post(
-      `https://api.geocodio.com/v1.7/geocode?api_key=${GEOCODIO_API_KEY}`,
-      { addresses: queries }
-    );
+    // Using proxy to avoid CORS issues
+    const response = await fetch(`${API_BASE_URL}/geocode/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(queries)
+    });
+
+    if (!response.ok) {
+      throw new Error('HTTP error ' + response.status);
+    }
+
+    const data = await response.json();
 
     // Update backend with coordinates
     for (let i = 0; i < addresses.length; i++) {
       const addr = addresses[i];
-      const result = response.data.results[i];
+      const result = data.results[i];
 
-      if (result.best_match) {
-        const { lat, lng } = result.best_match.location;
+      if (result?.response?.results?.[0]?.location) {
+        const { lat, lng } = result.response.results[0].location;
 
-        // Uses geocode endpoint
         await fetch(`${API_BASE_URL}/organizations/${addr.location_id}/geocode?lat=${lat}&lng=${lng}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ latitude: lat, longitude: lng })
+          method: 'PUT'
         });
-        
-        console.log(`✓ ${addr.street_address}: (${lat}, ${lng})`);
+        console.log(`✓ Geocoded: ${addr.street_address} → (${lat}, ${lng})`);
+      } else {
+        console.warn(`⚠️ No geocode result for: ${addr.street_address}`);
       }
     }
   } catch (error) {
@@ -67,24 +74,23 @@ async function geocodeBatch(addresses) {
   }
 }
 
+
 export async function geocodeSingleAddress(locationId, streetAddress, city, postalCode) {
-  const query = `${streetAddress}, ${city}, ${postalCode}, Canada`;
+  const query = `${streetAddress}, ${city}, ${postalCode || ''}, Canada`;
 
   try {
-    const response = await axios.post(
-      `https://api.geocodio.com/v1.7/geocode?api_key=${GEOCODIO_API_KEY}`,
-      { addresses: [query] }
+    // Calling proxy again to avoid CORS issues in frontend
+    const response = await fetch(
+      `${API_BASE_URL}/geocode/single?address=${encodeURIComponent(query)}`,
     );
 
-    const result = response.data.results[0];
+    const data = await response.json();
 
-    if (result.best_match) {
-      const { lat, lng } = result.best_match.location;
+    if (data.results && data.results[0]) {
+      const { lat, lng } = data.results[0].location;
 
       await fetch(`${API_BASE_URL}/organizations/${locationId}/geocode?lat=${lat}&lng=${lng}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latitude: lat, longitude: lng })
+        method: 'PUT'
       });
 
       return { lat, lng };
