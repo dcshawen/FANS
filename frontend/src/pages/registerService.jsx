@@ -237,13 +237,16 @@ export default function RegisterService() {
               )}
               <div className="row g-2">
                 <div className="col-6">
-                  <input
-                    {...register('city', { required: 'City is required', maxLength: 100 })}
-                    type="text"
-                    className={`form-control form-control-lg ${errors.city ? 'is-invalid' : ''}`}
-                    placeholder="City"
+                  <select
+                    {...register('city', { required: 'City is required' })}
+                    className={`form-select form-select-lg ${errors.city ? 'is-invalid' : ''}`}
                     style={{ borderWidth: '2px' }}
-                  />
+                  >
+                    <option value="">Select City</option>
+                    <option value="Halifax">Halifax, NS</option>
+                    <option value="Dartmouth">Dartmouth, NS</option>
+                    <option value="Cole Harbour">Cole Harbour, NS</option>
+                  </select>
                   {errors.city && (
                     <div className="invalid-feedback">{errors.city.message}</div>
                   )}

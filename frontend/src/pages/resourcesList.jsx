@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ResourceCard from '../components/resourceCard';
+import ListCard from '../components/listcard';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -17,27 +17,14 @@ export default function ResourcesList() {
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
-      // First get all organizations (summary)
       const response = await fetch(`${API_BASE_URL}/organizations`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch organizations');
       }
       
-      const summaryList = await response.json();
-      
-      // Fetch full details for each organization (includes schedules)
-      const fullOrganizations = await Promise.all(
-        summaryList.map(async (org) => {
-          const detailResponse = await fetch(`${API_BASE_URL}/organizations/${org.location_id}`);
-          if (detailResponse.ok) {
-            return detailResponse.json();
-          }
-          return org; // Return summary if detail fetch fails
-        })
-      );
-      
-      setOrganizations(fullOrganizations);
+      const organizations = await response.json();
+      setOrganizations(organizations);
     } catch (err) {
       console.error('Error fetching organizations:', err);
       setError(err.message);
@@ -108,7 +95,7 @@ export default function ResourcesList() {
             <div className="row g-4">
               {organizations.map((org) => (
                 <div key={org.location_id} className="col-12 col-md-6">
-                  <ResourceCard organization={org} />
+                  <ListCard organization={org} />
                 </div>
               ))}
             </div>
