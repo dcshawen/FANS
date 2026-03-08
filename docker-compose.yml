@@ -32,7 +32,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: FANTS-FastAPI-Dev
+    container_name: FANS-FastAPI-Dev
     ports:
       - "8000:8000"
     volumes:
