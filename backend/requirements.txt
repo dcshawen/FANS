@@ -4,3 +4,4 @@ pydantic[email]
 pymysql
 sqlalchemy
 httpx
+alembic
