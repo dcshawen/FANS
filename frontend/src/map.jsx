@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
 import './map.css';
 import { set } from 'react-hook-form';
+import { GraphHopperRouting } from 'graphhopper-js-api-client';
 
 const API_BASE_URL = 'http://localhost:8000';
+const GRAPH_HOPPER_API_KEY = process.env.GRAPH_HOPPER_API_KEY; // Replace with your actual API key
 
 function MapComponent({ 
     center = [-63.5923, 44.6509],
@@ -315,6 +317,34 @@ function MapComponent({
             });
         }
     };
+
+    const getRoute = async (startCoords, endCoords, routeName = '') => {
+        const apiKey = GRAPH_HOPPER_API_KEY;
+
+        try {
+            const url = `https://graphhopper.com/api/1/route?` +
+                `point=${startCoords[1]},${startCoords[0]}` +
+                `&point=${endCoords[1]},${endCoords[0]}` +
+                `key=${apiKey}` +
+                `locale=en&` +
+                `points_encoded=false&` + 
+                `instructions=true`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Route request failed');
+
+            const data = await response.json();
+            if (data.paths && data.paths.length > 0) {
+                return data.paths[0]; // Returns the first or best route
+            }
+            throw new Error('No route found');
+        } catch (error) {
+            console.error('GraphHopper routing error:', error);
+            alert('Could not find route. Please try again later.');
+            return null;
+        }
+    };
+
+
 
     const closePopup = () => {
         setSelectedMarker(null);

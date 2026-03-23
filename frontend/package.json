@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@graphhopper/directions-api-js-client": "^8.0.13",
     "axios": "^1.13.6",
     "bootstrap": "^5.3.3",
     "dotenv": "^17.2.3",
