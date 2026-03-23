@@ -344,7 +344,87 @@ function MapComponent({
         }
     };
 
+    // Displays the route on the map
+    const displayRoute = (routePath) => {
+        if (!map.current || !routePath) return;
 
+        // Remove any existing route
+        if (map.current.getSource('route-line')) {
+            map.current.getSource('route-line').setData({
+                type: 'FeatureCollection',
+                features: []
+            });
+        } else {
+            // Add source and layer for route
+            map.current.addSource('route-line', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'route-line-layer',
+                type: 'line',
+                source: 'route-line',
+                paint: {
+                    'line-color': '#FFB88C',
+                    'line-width': 4,
+                    'line-opacity': 0.8
+                }
+            }, 
+            'food-marker-layer' // Drawn under markers
+            );
+        }
+
+        // Convert route points to GeoJSON
+        const coords = routePath.points.coordinates;
+
+        map.current.getSource('route-line').setData({
+            type: 'FeatureCollection',
+            features: [{
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coords
+                },
+                properties: {
+                    distance: routePath.distance,
+                    time: routePath.time
+                }
+            }]
+        });
+
+        // Fit map bounds to route
+        if (coords.length > 0) {
+            const bounds = new maplibregl.LngLatBounds();
+            coords.forEach(coord => bounds.extend(coord));
+            map.current.fitBounds(bounds, { padding: 50 });
+        }
+    };
+
+    const handleGetDirections = async (destination) => {
+        if (!userLocation) return;
+        console.log('Getting directions from', userLocation, 'to', destination.name);
+
+        const route = await getRoute(userLocation, [destination.longitude, destination.latitude]);
+        if (route) {
+            displayRoute(route);
+
+            // Distance and time
+            const distanceKm = (route.distance / 1000).toFixed(2);
+            const timeMin = Math.ceil(route.time / 60000);
+            console.log(`Route: ${distanceKm} km, ${timeMin} min`);
+        }
+    };
+
+    // Clear the displayed route
+    const clearRoute = () => {
+        if (map.current && map.current.getSource('route-line')) {
+            map.current.getSource('route-line').setData({
+                type: 'FeatureCollection',
+                features: []
+            });
+        }
+    }
 
     const closePopup = () => {
         setSelectedMarker(null);
