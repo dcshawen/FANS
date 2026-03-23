@@ -4,10 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
 import './map.css';
 import { set } from 'react-hook-form';
-import { GraphHopperRouting } from 'graphhopper-js-api-client';
 
 const API_BASE_URL = 'http://localhost:8000';
-const GRAPH_HOPPER_API_KEY = process.env.GRAPH_HOPPER_API_KEY; // Replace with your actual API key
+const GRAPH_HOPPER_API_KEY = import.meta.env.VITE_GRAPH_API_KEY; // Replace with your actual API key
 
 function MapComponent({ 
     center = [-63.5923, 44.6509],
@@ -276,9 +275,9 @@ function MapComponent({
             geometry: {
                 type: 'Point',
                 coordinates: [org.longitude, org.latitude]
-        }, 
-        properties: {
-            location_id: org.location_id,
+            }, 
+            properties: {
+                location_id: org.location_id,
                 name: org.name,
                 description: org.description || '',
                 street_address: org.street_address || '',
@@ -289,9 +288,8 @@ function MapComponent({
                 // Include related data
                 contacts: JSON.stringify(org.contacts || []),
                 schedules: JSON.stringify(org.schedules || [])
-        }
-
-    }));
+            }
+        }));
 
     source.setData({
         type: 'FeatureCollection', 
@@ -319,13 +317,13 @@ function MapComponent({
     };
 
     const getRoute = async (startCoords, endCoords, routeName = '') => {
-        const apiKey = GRAPH_HOPPER_API_KEY;
+        const apiKey = import.meta.env.VITE_GRAPH_API_KEY;
 
         try {
             const url = `https://graphhopper.com/api/1/route?` +
-                `point=${startCoords[1]},${startCoords[0]}` +
-                `&point=${endCoords[1]},${endCoords[0]}` +
-                `key=${apiKey}` +
+                `point=${startCoords[1]},${startCoords[0]}&` +
+                `point=${endCoords[1]},${endCoords[0]}&` +
+                `key=${apiKey}&` +
                 `locale=en&` +
                 `points_encoded=false&` + 
                 `instructions=true`;
@@ -428,6 +426,7 @@ function MapComponent({
 
     const closePopup = () => {
         setSelectedMarker(null);
+        clearRoute();
     }
 
     return (
@@ -475,7 +474,11 @@ function MapComponent({
                     <button
                         className="popup-directions-btn"
                         onClick={() => {
-                            console.log('Get directions from', userLocation, 'to', selectedMarker.name);
+                            if (!userLocation) {
+                                alert('Please enable location access to get directions');
+                                return;
+                            }
+                            handleGetDirections(selectedMarker);
                         }}
                     >
                         🗺️ Get Directions
