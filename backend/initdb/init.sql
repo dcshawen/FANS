@@ -81,102 +81,155 @@ INSERT INTO `Organization`
 VALUES
 -- Hope Cottage
 ('Hope Cottage',
- 'Eat-in and takeaway meals twice daily; menu varies.',
+ 'Hope’s Cottage is a long‑standing community soup kitchen in Halifax that helps address this need by providing free, nutritious meals in a safe and respectful environment.
+ Providing Eat-in and Take-Away meals twice daily (lunch and supper) No cost, no referral required, and no judgment. Support for people experiencing homelessness or financial hardship.
+ Food donations at the door from 10am to 6pm M–F.',
  '2435 Brunswick St', 'Halifax, NS', 'B3K 2Z4', NULL, NULL),
 
 -- Brunswick Street Mission
 ('Brunswick Street Mission',
- 'Free breakfast and food support.',
+ 'Brunswick Street Mission is a community support organization in Halifax’s North End that addresses food insecurity and poverty in a welcoming and dignified environment.
+ Providing hot breakfasts, a food bank, and drop‑in supports. No cost, no referral required. Support for individuals experiencing homelessness or financial hardship. Additional services include laundry access, ID support, and outreach services.
+ Meals typically include hot items (such as eggs, oatmeal, or casseroles) along with bread, fruit, and beverages. Designed to offer a nutritious start to the day.
+',
  '2107 Brunswick St', 'Halifax, NS', 'B3K 2Y4', NULL, NULL),
 
 -- Margaret’s House (F.O.O.D.)
 ('Margaret’s House (F.O.O.D.)',
- 'Free home-cooked meals; donations accepted at listed hours.',
+ 'Margaret’s House is a volunteer‑run meal program in Dartmouth providing nutritious food to adults in need across HRM.
+ Providing free home‑cooked take‑away lunches Monday–Friday. No cost and no referral required. Focused on dignity, care, and community support.
+ Meals are freshly prepared by volunteers and usually include a hot main dish, sides, and occasionally dessert.
+',
  '43 Wentworth St', 'Dartmouth, NS', 'B2Y 2T1', NULL, NULL),
 
 -- Parker Street Food Bank
 ('Parker Street Food Bank',
- 'Free food boxes; not cooked meals.',
+ 'Parker Street Food Bank supports individuals and families in HRM who are struggling to meet basic needs.
+ Providing food boxes, emergency assistance, and furniture support. Services are free and by appointment. Support for households facing financial hardship or crisis.
+ Food boxes from Parker Street Food Bank contain a selection of essential grocery items designed to help individuals and families prepare meals at home. The exact contents vary based on household size, dietary needs, and available donations, but boxes usually include a balanced mix of staple foods.
+ Typical food box items may include:
+ Canned goods such as vegetables, beans, soups, and fruit.
+ Dry pantry items like pasta, rice, cereal, flour, and oatmeal.
+ Protein options such as canned tuna, peanut butter, beans, or lentils.
+ Dairy or dairy alternatives when available (milk, powdered milk, or shelf‑stable options).
+ Bread or bakery items.
+ Fresh produce including fruits and vegetables when in stock.
+ Basic household food staples like cooking oil or condiments (availability varies).
+ Food boxes are tailored to the size of the household, meaning families, single adults, and seniors receive appropriate amounts.
+',
  '2415 Maynard St', 'Halifax, NS', 'B3K 3V2', NULL, NULL),
 
 
 -- Feeding Others of Dartmouth
 ('Feeding Others of Dartmouth',
- 'Daily free meals.',
+ 'Feeding Others of Dartmouth operates community meal services through Margaret’s House.
+ Providing free hot and take‑away meals to adults experiencing food insecurity. No cost, no referral required. Supported by volunteers and community donations.',
  '43 Wentworth St', 'Dartmouth, NS', NULL, NULL, NULL),
 
 -- Souls Harbour Rescue Mission
 ('Souls Harbour Rescue Mission',
- 'Free hot lunch.',
+ 'Souls Harbour Rescue Mission supports people facing hunger, homelessness, and crisis in Halifax and across Nova Scotia.
+ Providing free hot meals, drop‑in services, clothing, and shelter supports. No cost, no referral required. A safe and welcoming environment for immediate food support.
+ Meals are substantial and may include meat or vegetarian options, sides, soup, and beverages. Designed to address immediate hunger in a safe, supportive environment.
+',
  '5568 Cunard St', 'Halifax, NS', NULL, NULL, NULL),
 
 -- St. George’s Anglican Church
 ('St. George’s Anglican Church',
- 'Free community supper.',
+ 'St. George’s Anglican Church offers a regular community meal program in Halifax.
+ Providing a free hot supper once a week. Meals are simple, warm, and nourishing, often including a main dish with sides. Open to anyone experiencing food insecurity. No cost and no referral required.',
  '2222 Brunswick St', 'Halifax, NS', NULL, NULL, NULL),
 
 -- St. Matthew’s United Church
 ('St. Matthew’s United Church',
- 'Free breakfast.',
+ 'St. Matthew’s United Church provides a weekly free breakfast program, welcoming individuals experiencing food insecurity in downtown Halifax. Meals typically include hot breakfast items, bread, fruit, and hot beverages. Focused on nourishment and community connection.',
  '1479 Barrington St', 'Halifax, NS', NULL, NULL, NULL),
 
 -- David’s Place Drop-In (The Presbyterian Church of Saint David)
 ('David’s Place Drop-In',
- 'Free snacks/light food.',
+ 'David’s Place Drop‑In provides a free hot takeaway lunch for people experiencing food insecurity in Halifax. Meals are prepared by volunteers and change weekly, but are always intended to be filling, nutritious, and comforting.
+ Meal details:
+ Hot, freshly prepared meals (menu varies each week)
+ Typically includes a main dish (such as casseroles, soups, stews, pasta, or similar hearty meals)
+ Often paired with bread and/or a simple side, depending on availability.
+ Meals are served take‑away style for convenience.
+',
  '1537 Brunswick St', 'Halifax, NS', NULL, NULL, NULL),
 
 -- Happy at Home Halifax
 ('Happy at Home Halifax',
- 'Free frozen meal delivery for seniors (55+); waitlist applies.',
+ 'Happy at Home Halifax supports seniors (55+)who face barriers to food access and meal preparation.
+ Providing free frozen meals delivered weekly to seniors’ homes. No cost. Designed to help seniors remain safe, nourished, and independent at home.
+ Meals include a main dish, roll, and dessert, designed to be reheated easily.
+',
  'Delivery (no fixed site)', 'Halifax, NS', NULL, NULL, NULL),
 
 
 -- Sunday Supper - St. Andrew’s
 ('Sunday Supper - St. Andrew’s',
- 'Free weekly supper.',
+ 'Sunday Supper is a longstanding community meal program in Halifax.
+ Providing a free hot meal every Sunday evening, available for eat‑in or take‑away. No cost, no referral required. Focused on dignity, belonging, and community care.
+ Meals are home‑style and generous, typically including a main course, sides, and dessert.',
  '6036 Coburg Rd', 'Halifax, NS', NULL, NULL, NULL),
 
 -- St. Mary’s Basilica Drop-In (Daily Bread)
 ('St. Mary’s Basilica Drop-In (Daily Bread)',
- 'Free light food/snacks/hot beverages.',
+ 'St. Mary’s Basilica hosts a weekday drop‑in food program in central Halifax.
+ Providing sandwiches, snacks, and hot or cold beverages during daytime hours. No cost, no referral required.',
  '5221 Spring Garden Rd', 'Halifax, NS', NULL, NULL, NULL),
 
 -- Brunswick Street Mission Café
 ('Brunswick Street Mission Café',
- 'Free beverages/snacks.',
+ 'The Brunswick Street Mission Café (Red Door Café) is a safe drop‑in space connected to food‑security services.
+ Providing snacks, sandwiches, baked goods, and beverages, alongside a warm indoor space for rest and connection. No cost and open to those in need.',
  '2107 Brunswick St', 'Halifax, NS', NULL, NULL, NULL),
 
 
 -- Dartmouth North Christian Food Bank
 ('Dartmouth North Christian Food Bank',
- 'Food bank access once a week.',
+ 'Dartmouth North Christian Food Bank serves residents of Dartmouth North experiencing food insecurity.
+ Providing emergency food assistance for individuals and families. No cost. Community‑based support.
+ Note: Does not provide prepared meals.
+ Offers food hampers with groceries for home cooking, including canned and dry goods and fresh items when available.',
  '27 Farrell St', 'Dartmouth, NS', NULL, NULL, NULL),
 
 
 -- Family SOS Community Market
 ('Family SOS Community Market',
- 'Free community market; pre‑registration required.',
+ 'Family SOS Community Market helps families manage rising food costs while maintaining dignity and choice.
+ Providing affordable groceries through a community market model. Designed to support families experiencing financial pressure.
+',
  '4 Cranberry Court', 'Halifax, NS', NULL, NULL, NULL),
 
 -- The Loaded Ladle
 ('The Loaded Ladle',
- 'Free fresh plant-based meals (vegan/gluten-friendly); bring your own container.',
+ 'The Loaded Ladle is a student‑run, nonprofit food program in Halifax.
+ Providing free, nutritious vegetarian meals, primarily for students but open to the broader community. No cost and no referral required.
+ Meals are nutritious and often include a hot entrée, vegetables, and grains.',
  '6136 University Ave', 'Halifax, NS', NULL, NULL, NULL),
 
 -- The North Grove
 ('The North Grove',
- 'Community hub with meals and food support (see weekly calendar).',
+ 'The North Grove is a family resource and community hub focused on long‑term food security.
+ Providing community food programs, markets, and family supports to improve access to healthy food.
+',
  '6 Primrose St', 'Dartmouth, NS', NULL, NULL, NULL),
 
 -- Salvation Army (Gottingen St)
 ('Salvation Army',
- 'Food bank; appointment usually required.',
+ 'Food bank; The Salvation Army supports individuals and families facing food insecurity across HRM.
+ Providing food banks, hot meals, and emergency food assistance. No cost, no referral required.
+ Meals are typically simple, nutritious, and free, and food banks provide groceries for home preparation.
+ Note: appointment usually required.
+',
  '2038 Gottingen St', 'Halifax, NS', NULL, NULL, NULL),
 
 
 -- Community Fridges (multiple sites)
 ('Community Fridges',
- 'Free food access pantry — take what you need, leave what you can.',
+ 'Community Fridges are public, shared food‑access points located throughout HRM.
+ Providing free, 24/7 access to food. Anyone may take food when needed or donate food for others.
+ May include prepared meals, snacks, fresh produce, and packaged foods..',
  'Multiple locations', 'Halifax/Dartmouth, NS', NULL, NULL, NULL);
 
 
