@@ -78,6 +78,16 @@ class FoodOffered(FoodOfferedBase):
         from_attributes = True
 
 
+class Tag(BaseModel):
+    """Model for Tag with ID"""
+    id: int = Field(..., description="Primary key")
+    location_id: int = Field(..., description="Foreign key to Organization")
+    tag: str = Field(..., max_length=255, description="Tag text")
+
+    class Config:
+        from_attributes = True
+
+
 class OrganizationBase(BaseModel):
     """Base model for Organization"""
     name: str = Field(..., max_length=255, description="Organization name")
@@ -100,6 +110,7 @@ class Organization(OrganizationBase):
     contacts: List[Contact] = Field(default_factory=list, description="List of contacts")
     schedules: List[Schedule] = Field(default_factory=list, description="List of schedules")
     food_offerings: List[FoodOffered] = Field(default_factory=list, description="List of food offerings")
+    tags: List[Tag] = Field(default_factory=list, description="List of tags")
 
     class Config:
         from_attributes = True
