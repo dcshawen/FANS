@@ -46,6 +46,7 @@ export default function HomePage({ onGetStarted }) {
           <button 
             className="btn btn-link w-100 text-decoration-underline p-0 small" 
             style={{ color: '#6A7F5F' }}
+            onClick={() => navigate('/map')}
           >
             Use my current location
           </button>
