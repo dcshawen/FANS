@@ -61,10 +61,19 @@ CREATE TABLE IF NOT EXISTS `FoodOffered` (
   FOREIGN KEY (`location_id`) REFERENCES `Organization`(`location_id`) ON DELETE CASCADE
 );
 
+-- Tag table (related to Organization)
+CREATE TABLE IF NOT EXISTS `Tag` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `location_id` INT NOT NULL,
+  `tag` VARCHAR(255) NOT NULL,
+  FOREIGN KEY (`location_id`) REFERENCES `Organization`(`location_id`) ON DELETE CASCADE
+);
+
 -- Create indexes for better query performance
 CREATE INDEX idx_contact_location ON `Contact`(`location_id`);
 CREATE INDEX idx_schedule_location ON `Schedule`(`location_id`);
 CREATE INDEX idx_foodoffered_location ON `FoodOffered`(`location_id`);
+CREATE INDEX idx_tag_location ON `Tag`(`location_id`);
 
 
 INSERT INTO `Organization`
@@ -428,3 +437,104 @@ VALUES
 (@org,'Friday','00:00','23:59'),
 (@org,'Saturday','00:00','23:59'),
 (@org,'Sunday','00:00','23:59');
+
+
+-- =========================
+-- TAG SEED DATA
+-- =========================
+
+-- Hope Cottage
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Hot Meals' FROM `Organization` WHERE `name`='Hope Cottage';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Takeout' FROM `Organization` WHERE `name`='Hope Cottage';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Daily Meals' FROM `Organization` WHERE `name`='Hope Cottage';
+
+-- Brunswick Street Mission
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Breakfast' FROM `Organization` WHERE `name`='Brunswick Street Mission';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Food Support' FROM `Organization` WHERE `name`='Brunswick Street Mission';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Weekday Service' FROM `Organization` WHERE `name`='Brunswick Street Mission';
+
+-- Margaret's House (F.O.O.D.)
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Home-Cooked Meals' FROM `Organization` WHERE `name`='Margaret’s House (F.O.O.D.)';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Lunch Service' FROM `Organization` WHERE `name`='Margaret’s House (F.O.O.D.)';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Donations Accepted' FROM `Organization` WHERE `name`='Margaret’s House (F.O.O.D.)';
+
+-- Parker Street Food Bank
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Food Bank' FROM `Organization` WHERE `name`='Parker Street Food Bank';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Take-Home Boxes' FROM `Organization` WHERE `name`='Parker Street Food Bank';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Grocery Support' FROM `Organization` WHERE `name`='Parker Street Food Bank';
+
+-- Feeding Others of Dartmouth
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Daily Meals' FROM `Organization` WHERE `name`='Feeding Others of Dartmouth';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Lunch' FROM `Organization` WHERE `name`='Feeding Others of Dartmouth';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Supper' FROM `Organization` WHERE `name`='Feeding Others of Dartmouth';
+
+-- Souls Harbour Rescue Mission
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Hot Lunch' FROM `Organization` WHERE `name`='Souls Harbour Rescue Mission';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Weekday Service' FROM `Organization` WHERE `name`='Souls Harbour Rescue Mission';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Drop-In' FROM `Organization` WHERE `name`='Souls Harbour Rescue Mission';
+
+-- St. George's Anglican Church
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Community Supper' FROM `Organization` WHERE `name`='St. George’s Anglican Church';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Weekend Service' FROM `Organization` WHERE `name`='St. George’s Anglican Church';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Faith-Based' FROM `Organization` WHERE `name`='St. George’s Anglican Church';
+
+-- St. Matthew's United Church
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Breakfast' FROM `Organization` WHERE `name`='St. Matthew’s United Church';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Sunday Service' FROM `Organization` WHERE `name`='St. Matthew’s United Church';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Faith-Based' FROM `Organization` WHERE `name`='St. Matthew’s United Church';
+
+-- David's Place Drop-In
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Snacks' FROM `Organization` WHERE `name`='David’s Place Drop-In';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Light Meals' FROM `Organization` WHERE `name`='David’s Place Drop-In';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Drop-In' FROM `Organization` WHERE `name`='David’s Place Drop-In';
+
+-- Happy at Home Halifax
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Seniors 55+' FROM `Organization` WHERE `name`='Happy at Home Halifax';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Meal Delivery' FROM `Organization` WHERE `name`='Happy at Home Halifax';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Waitlist' FROM `Organization` WHERE `name`='Happy at Home Halifax';
+
+-- Sunday Supper - St. Andrew's
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Community Supper' FROM `Organization` WHERE `name`='Sunday Supper - St. Andrew’s';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Sunday Service' FROM `Organization` WHERE `name`='Sunday Supper - St. Andrew’s';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Faith-Based' FROM `Organization` WHERE `name`='Sunday Supper - St. Andrew’s';
+
+-- St. Mary's Basilica Drop-In (Daily Bread)
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Snacks' FROM `Organization` WHERE `name`='St. Mary’s Basilica Drop-In (Daily Bread)';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Hot Beverages' FROM `Organization` WHERE `name`='St. Mary’s Basilica Drop-In (Daily Bread)';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Weekday Service' FROM `Organization` WHERE `name`='St. Mary’s Basilica Drop-In (Daily Bread)';
+
+-- Brunswick Street Mission Café
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Snacks' FROM `Organization` WHERE `name`='Brunswick Street Mission Café';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Beverages' FROM `Organization` WHERE `name`='Brunswick Street Mission Café';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Drop-In' FROM `Organization` WHERE `name`='Brunswick Street Mission Café';
+
+-- Dartmouth North Christian Food Bank
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Food Bank' FROM `Organization` WHERE `name`='Dartmouth North Christian Food Bank';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Weekly Access' FROM `Organization` WHERE `name`='Dartmouth North Christian Food Bank';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Faith-Based' FROM `Organization` WHERE `name`='Dartmouth North Christian Food Bank';
+
+-- Family SOS Community Market
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Community Market' FROM `Organization` WHERE `name`='Family SOS Community Market';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Registration Required' FROM `Organization` WHERE `name`='Family SOS Community Market';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Family Support' FROM `Organization` WHERE `name`='Family SOS Community Market';
+
+-- The Loaded Ladle
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Plant-Based' FROM `Organization` WHERE `name`='The Loaded Ladle';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Vegan' FROM `Organization` WHERE `name`='The Loaded Ladle';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Gluten-Friendly' FROM `Organization` WHERE `name`='The Loaded Ladle';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Bring Your Own Container' FROM `Organization` WHERE `name`='The Loaded Ladle';
+
+-- The North Grove
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Community Hub' FROM `Organization` WHERE `name`='The North Grove';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Meal Support' FROM `Organization` WHERE `name`='The North Grove';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Family Support' FROM `Organization` WHERE `name`='The North Grove';
+
+-- Salvation Army
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Food Bank' FROM `Organization` WHERE `name`='Salvation Army';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Appointment Required' FROM `Organization` WHERE `name`='Salvation Army';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Emergency Support' FROM `Organization` WHERE `name`='Salvation Army';
+
+-- Community Fridges
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, '24/7 Access' FROM `Organization` WHERE `name`='Community Fridges';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Mutual Aid' FROM `Organization` WHERE `name`='Community Fridges';
+INSERT INTO `Tag` (`location_id`, `tag`) SELECT `location_id`, 'Multiple Locations' FROM `Organization` WHERE `name`='Community Fridges';

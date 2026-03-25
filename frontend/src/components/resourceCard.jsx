@@ -5,6 +5,11 @@ export default function ResourceCard({ organization }) {
   const contact = contacts && contacts.length > 0 ? contacts[0] : null;
   const phoneNumber = contact?.phone_number;
   const websiteUrl = contact?.websit_url; // Note: API has typo "websit_url"
+  const displayTags = Array.isArray(tags)
+    ? tags
+        .map((tag) => (typeof tag === 'string' ? tag : tag?.tag))
+        .filter(Boolean)
+    : [];
 
   // Format address
   const formatAddress = () => {
@@ -61,22 +66,10 @@ export default function ResourceCard({ organization }) {
         <div className="row">
           {/* Left Column - Tags, Address & Contact */}
           <div className="col-12 col-md-6 d-flex flex-column align-items-center align-items-md-start ps-md-5">
-            {/* Placeholder Tags */}
-            <div className="mb-3">
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Hot Meals
-              </span>
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Lunch Service
-              </span>
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Community
-              </span>
-            </div>
             {/* Tags */}
-            {tags && tags.length > 0 && (
+            {displayTags.length > 0 && (
               <div className="mb-3">
-                {tags.map((tag, index) => (
+                {displayTags.map((tag, index) => (
                   <span 
                     key={index} 
                     className="badge me-2 mb-1"
