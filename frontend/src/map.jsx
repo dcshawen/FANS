@@ -2,10 +2,11 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
+import DirectionsModal from './components/DirectionsModal';
 import './map.css';
-import { set } from 'react-hook-form';
 
 const API_BASE_URL = 'http://localhost:8000';
+const GRAPH_HOPPER_API_KEY = import.meta.env.VITE_GRAPH_API_KEY; 
 
 function MapComponent({ 
     center = [-63.5923, 44.6509],
@@ -28,6 +29,10 @@ function MapComponent({
     const [organizations, setOrganizations] = useState([]);
     const userMarkerRef = useRef(false);
     const [mapLoaded, setMapLoaded] = useState(false);
+
+    // Modal states
+    const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+    const [currentRoute, setCurrentRoute] = useState(null);
 
     // Initialize PMTiles protocol FIRST
     useEffect(() => {
@@ -117,8 +122,10 @@ function MapComponent({
 
             map.current.on('load', () => {
                 console.log('Map loaded, setting up layers...');
-                setupMapLayers();
-                setMapLoaded(true);
+                if (map.current) {
+                    setupMapLayers();
+                    setMapLoaded(true);
+                }
             });
 
             map.current.on('error', (e) => {
@@ -129,6 +136,7 @@ function MapComponent({
         };
 
         const setupMapLayers = () => {
+            if (!map.current) return;
             // User location source and layer
             if (!map.current.getSource('user-location')) {
                 map.current.addSource('user-location', {
@@ -217,6 +225,10 @@ function MapComponent({
                     });
                 });
 
+                // Auto fetch directions on marker click (Debatable, will run token cost up when browsing)
+
+
+
                 // Cursor change on hover
                 map.current.on('mouseenter', 'food-marker-layer', () => {
                     map.current.getCanvas().style.cursor = 'pointer';
@@ -274,9 +286,9 @@ function MapComponent({
             geometry: {
                 type: 'Point',
                 coordinates: [org.longitude, org.latitude]
-        }, 
-        properties: {
-            location_id: org.location_id,
+            }, 
+            properties: {
+                location_id: org.location_id,
                 name: org.name,
                 description: org.description || '',
                 street_address: org.street_address || '',
@@ -287,9 +299,8 @@ function MapComponent({
                 // Include related data
                 contacts: JSON.stringify(org.contacts || []),
                 schedules: JSON.stringify(org.schedules || [])
-        }
-
-    }));
+            }
+        }));
 
     source.setData({
         type: 'FeatureCollection', 
@@ -316,8 +327,120 @@ function MapComponent({
         }
     };
 
+    const getRoute = async (startCoords, endCoords, routeName = '') => {
+        const apiKey = import.meta.env.VITE_GRAPH_API_KEY;
+
+        try {
+            const url = `https://graphhopper.com/api/1/route?` +
+                `point=${startCoords[1]},${startCoords[0]}&` +
+                `point=${endCoords[1]},${endCoords[0]}&` +
+                `key=${apiKey}&` +
+                `locale=en&` +
+                `points_encoded=false&` + 
+                `instructions=true`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Route request failed');
+
+            const data = await response.json();
+            if (data.paths && data.paths.length > 0) {
+                return data.paths[0]; // Returns the first or best route
+            }
+            throw new Error('No route found');
+        } catch (error) {
+            console.error('GraphHopper routing error:', error);
+            alert('Could not find route. Please try again later.');
+            return null;
+        }
+    };
+
+    // Displays the route on the map
+    const displayRoute = (routePath) => {
+        if (!map.current || !routePath) return;
+
+        // Remove any existing route
+        if (map.current.getSource('route-line')) {
+            map.current.getSource('route-line').setData({
+                type: 'FeatureCollection',
+                features: []
+            });
+        } else {
+            // Add source and layer for route
+            map.current.addSource('route-line', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            map.current.addLayer({
+                id: 'route-line-layer',
+                type: 'line',
+                source: 'route-line',
+                paint: {
+                    'line-color': '#FFB88C',
+                    'line-width': 4,
+                    'line-opacity': 0.8
+                }
+            }, 
+            'food-marker-layer' // Drawn under markers
+            );
+        }
+
+        // Convert route points to GeoJSON
+        const coords = routePath.points.coordinates;
+
+        map.current.getSource('route-line').setData({
+            type: 'FeatureCollection',
+            features: [{
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coords
+                },
+                properties: {
+                    distance: routePath.distance,
+                    time: routePath.time
+                }
+            }]
+        });
+
+        // Fit map bounds to route
+        if (coords.length > 0) {
+            const bounds = new maplibregl.LngLatBounds();
+            coords.forEach(coord => bounds.extend(coord));
+            map.current.fitBounds(bounds, { padding: 50 });
+        }
+    };
+
+    const handleGetDirections = async (destination) => {
+        if (!userLocation || !map.current) return;
+        console.log('Getting directions from', userLocation, 'to', destination.name);
+
+        const route = await getRoute(userLocation, [destination.longitude, destination.latitude]);
+        if (route) {
+            setCurrentRoute(route);
+            displayRoute(route);
+
+            // Distance and time
+            const distanceKm = (route.distance / 1000).toFixed(2);
+            const timeMin = Math.ceil(route.time / 60000);
+            console.log(`Route: ${distanceKm} km, ${timeMin} min`);
+            console.log('Route instructions:', route.instructions);
+        }
+    };
+
+    // Clear the displayed route
+    const clearRoute = () => {
+        if (map.current && map.current.getSource('route-line')) {
+            map.current.getSource('route-line').setData({
+                type: 'FeatureCollection',
+                features: []
+            });
+        }
+        setCurrentRoute(null);
+    }
+
     const closePopup = () => {
         setSelectedMarker(null);
+        clearRoute();
     }
 
     return (
@@ -364,14 +487,26 @@ function MapComponent({
                     {/* Directions button logic to be implemented later */}
                     <button
                         className="popup-directions-btn"
-                        onClick={() => {
-                            console.log('Get directions from', userLocation, 'to', selectedMarker.name);
+                        onClick={async () => {
+                            if (!userLocation) {
+                                alert('Please enable location access to get directions');
+                                return;
+                            }
+                            await handleGetDirections(selectedMarker);
+                            setShowDirectionsModal(true);
                         }}
                     >
                         🗺️ Get Directions
                     </button>
                 </div>
             )}
+
+            <DirectionsModal
+                show={showDirectionsModal}
+                onClose={() => setShowDirectionsModal(false)}
+                destination={selectedMarker}
+                routeData={currentRoute}
+            />
         </div>
     );
 }

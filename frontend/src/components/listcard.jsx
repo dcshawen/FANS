@@ -1,8 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import DirectionsModal from './DirectionsModal';
 
 export default function ListCard({ organization }) {
   const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
   const [showHoursModal, setShowHoursModal] = useState(false);
+  const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [loadingDirections, setLoadingDirections] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState(null);
+
+  // Get user location using geolocation API
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([longitude, latitude]);
+        },
+        (error) => console.error('Geolocation error:', error)
+      );
+    }
+  }, []);
 
   // Get contact info from contacts
   const contact = contacts && contacts.length > 0 ? contacts[0] : null;
@@ -60,6 +78,48 @@ export default function ListCard({ organization }) {
     });
     return acc;
   }, {});
+
+  // Get directions using Modal
+  const handleOpenDirections = async () => {
+    if (!userLocation) {
+      alert('Could not determine your location. Please enable location services and try again.');
+      return;
+    }
+
+    setLoadingDirections(true);
+    try {
+      const apiKey = import.meta.env.VITE_GRAPH_API_KEY;
+      const url = `https://graphhopper.com/api/1/route?` +
+        `point=${userLocation[1]},${userLocation[0]}&` +
+        `point=${organization.latitude},${organization.longitude}&` +
+        `key=${apiKey}&` +
+        `locale=en&` +
+        `points_encoded=false&` +
+        `instructions=true`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Route request failed');
+
+      const data = await response.json();
+      if (data.paths && data.paths.length > 0) {
+        const route = data.paths[0];
+        setCurrentRoute(route);
+        setShowDirectionsModal(true);
+      } else {
+        alert('No route found');
+      }
+    } catch (error) {
+        console.error('Error fetching directions:', error);
+        alert('Could not find directions. Please try again.');
+    } finally {
+      setLoadingDirections(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowDirectionsModal(false);
+    setCurrentRoute(null);
+  };
 
   return (
     <div className="card shadow rounded-3 overflow-hidden" style={{ border: '2px solid #6A7F5F' }}>
@@ -123,7 +183,8 @@ export default function ListCard({ organization }) {
             <button 
               className="btn d-flex align-items-center gap-2"
               style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px' }}
-              onClick={() => alert('Directions feature coming soon!')}
+              onClick={handleOpenDirections}
+              disabled={loadingDirections}
             >
               <i className="bi bi-signpost-2"></i>
               Get Directions
@@ -202,6 +263,13 @@ export default function ListCard({ organization }) {
           </div>
         </div>
       )}
+      <DirectionsModal
+            show={showDirectionsModal}
+            onClose={handleCloseModal}
+            destination={organization}
+            routeData={currentRoute}
+          />
     </div>
+    
   );
 }
