@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import DirectionsModal from './DirectionsModal';
+import { useLocation } from 'react-router-dom';
+
 export default function ResourceCard({ organization }) {
   const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
 
@@ -167,7 +171,7 @@ export default function ResourceCard({ organization }) {
     </div>
 
     {/* Directions Modal */}
-    
+
   </>
   );
 }
