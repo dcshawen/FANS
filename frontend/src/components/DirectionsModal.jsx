@@ -42,9 +42,12 @@ export default function DirectionsModal({
         // GraphHopper instruction format is: 
         // [text, sign, waypoints, distance, time, street_name]
 
-        const text = instruction[0];
-        const distance = instruction[3] ? (instruction[3] / 1000).toFixed(2) : '0';
-        return { text, distance };
+        return {
+            text: instruction.text || 'Continue',
+            distance: instruction.distance ? (instruction.distance / 1000).toFixed(2) : '0',
+            time: instruction.time ? Math.ceil(instruction.time / 1000) : 0,
+            street: instruction.street_name || instruction.street_ref || ''
+        };
     };
 
     if (!show) return null;

@@ -77,13 +77,33 @@ export default function ResourceCard({ organization }) {
 
     setLoadingDirections(true);
     try {
-      const route = await getRoute(userLocation, [organization.longitude, organization.latitude]);
-      if (route) {
+      const apiKey = import.meta.env.VITE_GRAPH_API_KEY;
+      const url = `https://graphhopper.com/api/1/route?` +
+        `point=${userLocation[1]},${userLocation[0]}&` +
+        `point=${organization.latitude},${organization.longitude}&` +
+        `key=${apiKey}&` +
+        `locale=en&` +
+        `points_encoded=false&` +
+        `instructions=true`;
+
+      console.log('Fetching directions from resourceCard...');
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Route request failed');
+
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.paths && data.paths.length > 0) {
+        const route = data.paths[0];
+        console.log('Route instructions:', route.instructions);
         setCurrentRoute(route);
         setShowDirectionsModal(true);
+      } else {
+        alert('No route found');
       }
     } catch (error) {
       console.error('Error fetching directions:', error);
+      alert('Could not find directions. Please try again.');
     } finally {
       setLoadingDirections(false);
     }
