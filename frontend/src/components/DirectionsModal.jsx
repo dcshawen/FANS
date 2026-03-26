@@ -46,9 +46,18 @@ export default function DirectionsModal({
             text: instruction.text || 'Continue',
             distance: instruction.distance ? (instruction.distance / 1000).toFixed(2) : '0',
             time: instruction.time ? Math.ceil(instruction.time / 1000) : 0,
-            street: instruction.street_name || instruction.street_ref || ''
+            street: instruction.street_name || instruction.street_ref || '',
+            heading: instruction.heading || null
         };
     };
+
+    const getCardinalDirection = (heading) => {
+        if (heading === null || heading === undefined) return null;
+
+        const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+        const index = Math.round(heading / 22.5) % 16;
+        return directions[index];
+    }
 
     if (!show) return null;
 
@@ -136,7 +145,9 @@ export default function DirectionsModal({
                     <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                         <h6 className="fw-semibold mb-3">Turn-by-Turn Directions:</h6>
                         {directions.map((instruction, index) => {
-                        const { text, distance } = formatInstruction(instruction);
+                        const { text, distance, heading } = formatInstruction(instruction);
+                        const cardinal = getCardinalDirection(heading);
+                        
                         return (
                             <div 
                             key={index} 
@@ -155,7 +166,17 @@ export default function DirectionsModal({
                                 {index + 1}
                             </div>
                             <div className="flex-grow-1">
-                                <p className="mb-1 text-dark">{text}</p>
+                                <div className="d-flex align-items-center gap-2 mb-1">
+                                <p className="mb-0 text-dark">{text}</p>
+                                {cardinal && (
+                                    <span 
+                                    className="badge text-white"
+                                    style={{ backgroundColor: '#FFB88C', color: '#3A3F47', fontSize: '0.75rem' }}
+                                    >
+                                    {cardinal}
+                                    </span>
+                                )}
+                                </div>
                                 <small className="text-muted">{distance} km</small>
                             </div>
                             </div>
@@ -167,6 +188,7 @@ export default function DirectionsModal({
                         No directions available for this route.
                     </div>
                     )}
+                    
                 </div>
 
                 <div className="modal-footer border-0">
