@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DirectionsModal from './DirectionsModal';
-import { useLocation } from 'react-router-dom';
 import { getRoute } from '../routes';
 
 export default function ResourceCard({ organization }) {
@@ -8,6 +7,7 @@ export default function ResourceCard({ organization }) {
   const [showDirectionsModal, setShowDirectionsModal] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [loadingDirections, setLoadingDirections] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState(null);
 
   // Get user location using geolocation API
   useEffect(() => {
@@ -69,15 +69,29 @@ export default function ResourceCard({ organization }) {
     return acc;
   }, {});
 
-  const handleGetDirections = (vehicle) => {
+  const handleOpenDirections = async () => {
     if (!userLocation) {
       alert('Could not determine your location. Please enable location services and try again.');
-      return null;
+      return;
     }
 
     setLoadingDirections(true);
-    getRoute(userLocation, [organization.longitude, organization.latitude], vehicle)
-    setLoadingDirections(false);
+    try {
+      const route = await getRoute(userLocation, [organization.longitude, organization.latitude]);
+      if (route) {
+        setCurrentRoute(route);
+        setShowDirectionsModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching directions:', error);
+    } finally {
+      setLoadingDirections(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowDirectionsModal(false);
+    setCurrentRoute(null);
   };
 
   return (
@@ -189,7 +203,8 @@ export default function ResourceCard({ organization }) {
           <button 
             className="btn btn-sm d-flex align-items-center justify-content-center gap-1"
             style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
-            onClick={() => setShowDirectionsModal(true)}
+            onClick={handleOpenDirections}
+            disabled={loadingDirections || !userLocation}
           >
             <i className="bi bi-signpost-2"></i>
             Get Directions
@@ -201,10 +216,9 @@ export default function ResourceCard({ organization }) {
     {/* Directions Modal */}
       <DirectionsModal
         show={showDirectionsModal}
-        onClose={() => setShowDirectionsModal(false)}
-        onGetDirections={handleGetDirections}
+        onClose={handleCloseModal}
         destination={organization}
-        loading={loadingDirections}
+        routeData={currentRoute}
       />
   </>
   );

@@ -1,32 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function DirectionsModal({ 
     show, 
     onClose, 
-    onGetDirections, 
     destination, 
-    loading = false
+    routeData = null
  }) {
-    const [selectedVehicle, setSelectedVehicle] = useState('foot');
+    // const [selectedVehicle, setSelectedVehicle] = useState('foot');
     const [directions, setDirections] = useState(null);
     const [routeInfo, setRouteInfo] = useState(null);
 
+    // Currently causing issues with fetching directions
     const vehicles = [
         { value: 'foot', label: 'Walking', icon: 'bi-person-walking' },
         { value: 'car', label: 'Driving', icon: 'bi-car-front' },
         { value: 'bike', label: 'Cycling', icon: 'bi-bicycle' }
     ];
 
-    const handleGetDirections = async() => {
-        const result = await onGetDirections(selectedVehicle);
-        if (result) {
-            setDirections(result.instructions);
+    // const handleGetDirections = async() => {
+    //     const result = await onGetDirections();
+    //     if (result) {
+    //         setDirections(result.instructions);
+    //         setRouteInfo({
+    //             distance: (result.distance / 1000).toFixed(2), // Converts to km
+    //             time: Math.ceil(result.time / 60000) // Converts to minutes
+    //         });
+    //     }
+    // };
+
+    useEffect(() => {
+        if (routeData) {
+            setDirections(routeData.instructions);
             setRouteInfo({
-                distance: (result.distance / 1000).toFixed(2), // Converts to km
-                time: Math.ceil(result.time / 60000) // Converts to minutes
-            });
-        }
-    };
+                distance: (routeData.distance / 1000).toFixed(2), // Converts to km
+                time: Math.ceil(routeData.time / 60000) // Converts to minutes
+             });
+         }
+    }, [routeData]);
 
     const formatInstruction = (instruction) => {
         // GraphHopper instruction format is: 
@@ -66,29 +76,30 @@ export default function DirectionsModal({
                 <div className="modal-body p-4">
                     {/* Vehicle Selection */}
                     <div className="mb-4">
-                        <label className="fw-semibold mb-2">Select Travel Method:</label>
-                        <div className="d-flex gap-2">
-                            {vehicles.map(vehicle => (
-                            <button
-                                key={vehicle.value}
-                                className={`btn btn-sm ${selectedVehicle === vehicle.value ? 'active' : 'btn-outline-secondary'}`}
-                                style={selectedVehicle === vehicle.value ? { backgroundColor: '#6A7F5F', borderColor: '#6A7F5F' } : {}}
-                                onClick={() => {
-                                setSelectedVehicle(vehicle.value);
-                                setDirections(null);
-                                setRouteInfo(null);
-                                }}
-                                disabled={loading}
-                            >
-                                <i className={`bi ${vehicle.icon} me-1`}></i>
-                                {vehicle.label}
-                            </button>
-                            ))}
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                <label className="fw-semibold mb-0">Select Travel Method:</label>
+                                <span className="badge bg-secondary" style={{ fontSize: '0.7rem' }}>Coming Soon</span>
+                            </div>
+                            <div className="d-flex gap-2">
+                                {vehicles.map(vehicle => (
+                                    <button
+                                        key={vehicle.value}
+                                        className="btn btn-sm btn-outline-secondary"
+                                        style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                                        disabled
+                                    >
+                                        <i className={`bi ${vehicle.icon} me-1`}></i>
+                                        {vehicle.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <small className="text-muted d-block mt-2">
+                                Multiple vehicle options will be available in a future update. Currently showing walking directions.
+                            </small>
                         </div>
-                    </div>
 
                     {/* Get Directions Button */}
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                     <button
                         className="btn w-100"
                         style={{ backgroundColor: '#6A7F5F', color: 'white' }}
@@ -107,7 +118,7 @@ export default function DirectionsModal({
                         </>
                         )}
                     </button>
-                    </div>
+                    </div> */}
 
                     {/* Route Info */}
                     {routeInfo && (

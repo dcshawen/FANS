@@ -2,8 +2,8 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import { PMTiles, Protocol } from 'pmtiles';
+import DirectionsModal from './components/DirectionsModal';
 import './map.css';
-import { set } from 'react-hook-form';
 
 const API_BASE_URL = 'http://localhost:8000';
 const GRAPH_HOPPER_API_KEY = import.meta.env.VITE_GRAPH_API_KEY; 
@@ -29,6 +29,10 @@ function MapComponent({
     const [organizations, setOrganizations] = useState([]);
     const userMarkerRef = useRef(false);
     const [mapLoaded, setMapLoaded] = useState(false);
+
+    // Modal states
+    const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+    const [currentRoute, setCurrentRoute] = useState(null);
 
     // Initialize PMTiles protocol FIRST
     useEffect(() => {
@@ -118,8 +122,10 @@ function MapComponent({
 
             map.current.on('load', () => {
                 console.log('Map loaded, setting up layers...');
-                setupMapLayers();
-                setMapLoaded(true);
+                if (map.current) {
+                    setupMapLayers();
+                    setMapLoaded(true);
+                }
             });
 
             map.current.on('error', (e) => {
@@ -130,6 +136,7 @@ function MapComponent({
         };
 
         const setupMapLayers = () => {
+            if (!map.current) return;
             // User location source and layer
             if (!map.current.getSource('user-location')) {
                 map.current.addSource('user-location', {
@@ -209,7 +216,6 @@ function MapComponent({
 
                     if (onMarkerClick) {
                         onMarkerClick(markerData);
-                        handleGetDirections(markerData);
                     }
 
                     // Center on selected marker
@@ -218,6 +224,10 @@ function MapComponent({
                         zoom: Math.max(map.current.getZoom(), 13),
                     });
                 });
+
+                // Auto fetch directions on marker click (Debatable, will run token cost up when browsing)
+
+
 
                 // Cursor change on hover
                 map.current.on('mouseenter', 'food-marker-layer', () => {
@@ -401,17 +411,19 @@ function MapComponent({
     };
 
     const handleGetDirections = async (destination) => {
-        if (!userLocation) return;
+        if (!userLocation || !map.current) return;
         console.log('Getting directions from', userLocation, 'to', destination.name);
 
         const route = await getRoute(userLocation, [destination.longitude, destination.latitude]);
         if (route) {
+            setCurrentRoute(route);
             displayRoute(route);
 
             // Distance and time
             const distanceKm = (route.distance / 1000).toFixed(2);
             const timeMin = Math.ceil(route.time / 60000);
             console.log(`Route: ${distanceKm} km, ${timeMin} min`);
+            console.log('Route instructions:', route.instructions);
         }
     };
 
@@ -423,6 +435,7 @@ function MapComponent({
                 features: []
             });
         }
+        setCurrentRoute(null);
     }
 
     const closePopup = () => {
@@ -474,18 +487,26 @@ function MapComponent({
                     {/* Directions button logic to be implemented later */}
                     <button
                         className="popup-directions-btn"
-                        onClick={() => {
+                        onClick={async () => {
                             if (!userLocation) {
                                 alert('Please enable location access to get directions');
                                 return;
                             }
-                            handleGetDirections(selectedMarker);
+                            await handleGetDirections(selectedMarker);
+                            setShowDirectionsModal(true);
                         }}
                     >
                         🗺️ Get Directions
                     </button>
                 </div>
             )}
+
+            <DirectionsModal
+                show={showDirectionsModal}
+                onClose={() => setShowDirectionsModal(false)}
+                destination={selectedMarker}
+                routeData={currentRoute}
+            />
         </div>
     );
 }
