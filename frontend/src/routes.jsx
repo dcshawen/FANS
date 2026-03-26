@@ -1,19 +1,37 @@
 require('dotenv').config();
+// Unique getRoute function for specific directions, separate from the original line graph
 
-const { GRAPH_API_KEY } = process.env;
+const { VITE_GRAPH_API_KEY } = process.env;
 
-const getRoute = async (destination) => {
-    const [userLng, userLat] = userLocation;
-    const [destLng, destLat] = destination;
+const getRoute = async (startCoords, endCoords, vehicle = 'foot', routeName = '') => { // Uses foot as default method
+    const [userLng, userLat] = startCoords;
+    const [destLng, destLat] = endCoords;
 
-    const response = await fetch(
-        `https://graphhopper.com/api/1/route?`+
-        `point=${userLat},${userLng}&` +
-        `point=${destLat},${destLng}&` +
-        `vehicle=foot&` +
-        `locale=en&` +
-        `key=${GRAPH_API_KEY}`
-    );
+    try {
+        const url =
+            `https://graphhopper.com/api/1/route?`+
+            `point=${userLat},${userLng}&` +
+            `point=${destLat},${destLng}&` +
+            `vehicle=${vehicle}&` +
+            `key=${VITE_GRAPH_API_KEY}&` +
+            `locale=en&` +
+            `points_encoded=false&` +
+            `instructions=true`;
 
-    return await response.json();
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`GraphHopper API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (data.paths && data.paths.length > 0) {
+            return data.paths[0]; // Returns the route with instructions
+        } 
+        throw new Error('No route found');
+
+    } catch (error) {
+        console.error('Error fetching route:', error);
+        alert('Unable to fetch route. Please try again later.');
+        return null;
+    }    
 }

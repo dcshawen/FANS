@@ -6,7 +6,7 @@ import './map.css';
 import { set } from 'react-hook-form';
 
 const API_BASE_URL = 'http://localhost:8000';
-const GRAPH_HOPPER_API_KEY = import.meta.env.VITE_GRAPH_API_KEY; // Replace with your actual API key
+const GRAPH_HOPPER_API_KEY = import.meta.env.VITE_GRAPH_API_KEY; 
 
 function MapComponent({ 
     center = [-63.5923, 44.6509],
@@ -209,6 +209,7 @@ function MapComponent({
 
                     if (onMarkerClick) {
                         onMarkerClick(markerData);
+                        handleGetDirections(markerData);
                     }
 
                     // Center on selected marker

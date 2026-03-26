@@ -49,6 +49,7 @@ export default function ResourceCard({ organization }) {
   }, {});
 
   return (
+    <>
     <div className="card shadow rounded-3 overflow-hidden" style={{ border: '2px solid #6A7F5F' }}>
       {/* Green Header with Organization Name */}
       <div className="card-header py-2 text-center" style={{ backgroundColor: '#6A7F5F' }}>
@@ -164,5 +165,9 @@ export default function ResourceCard({ organization }) {
         </div>
       </div>
     </div>
+
+    {/* Directions Modal */}
+    
+  </>
   );
 }
