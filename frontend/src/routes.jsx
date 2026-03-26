@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const { VITE_GRAPH_API_KEY } = process.env;
 
-const getRoute = async (startCoords, endCoords, vehicle = 'foot', routeName = '') => { // Uses foot as default method
+export const getRoute = async (startCoords, endCoords, vehicle = 'foot', routeName = '') => { // Uses foot as default method
     const [userLng, userLat] = startCoords;
     const [destLng, destLat] = endCoords;
 

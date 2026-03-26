@@ -1,9 +1,26 @@
 import { useState } from 'react';
 import DirectionsModal from './DirectionsModal';
 import { useLocation } from 'react-router-dom';
+import { getRoute } from '../routes';
 
 export default function ResourceCard({ organization }) {
   const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
+  const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [loadingDirections, setLoadingDirections] = useState(false);
+
+  // Get user location using geolocation API
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([longitude, latitude]);
+        },
+        (error) => console.error('Geolocation error:', error)
+        );
+      }
+  }, []);
 
   // Get contact info from contacts
   const contact = contacts && contacts.length > 0 ? contacts[0] : null;
@@ -51,6 +68,17 @@ export default function ResourceCard({ organization }) {
     });
     return acc;
   }, {});
+
+  const handleGetDirections = (vehicle) => {
+    if (!userLocation) {
+      alert('Could not determine your location. Please enable location services and try again.');
+      return null;
+    }
+
+    setLoadingDirections(true);
+    getRoute(userLocation, [organization.longitude, organization.latitude], vehicle)
+    setLoadingDirections(false);
+  };
 
   return (
     <>
@@ -161,7 +189,7 @@ export default function ResourceCard({ organization }) {
           <button 
             className="btn btn-sm d-flex align-items-center justify-content-center gap-1"
             style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
-            onClick={() => alert('Directions feature coming soon!')}
+            onClick={() => setShowDirectionsModal(true)}
           >
             <i className="bi bi-signpost-2"></i>
             Get Directions
@@ -171,7 +199,13 @@ export default function ResourceCard({ organization }) {
     </div>
 
     {/* Directions Modal */}
-
+      <DirectionsModal
+        show={showDirectionsModal}
+        onClose={() => setShowDirectionsModal(false)}
+        onGetDirections={handleGetDirections}
+        destination={organization}
+        loading={loadingDirections}
+      />
   </>
   );
 }
