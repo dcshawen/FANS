@@ -28,6 +28,7 @@ function MapComponent({
     const [selectedMarker, setSelectedMarker] = useState(null);
     const [organizations, setOrganizations] = useState([]);
     const userMarkerRef = useRef(false);
+    const markersRef = useRef([]);
     const [mapLoaded, setMapLoaded] = useState(false);
 
     // Modal states
@@ -158,27 +159,14 @@ function MapComponent({
                 });
             }
 
-            // Resource marker source and layers
+            // Resource marker source for labels
             if (!map.current.getSource('food-markers')) {
                 map.current.addSource('food-markers', {
                     type: 'geojson',
                     data: { type: 'FeatureCollection', features: [] }
                 });
 
-                // Marker circles
-                map.current.addLayer({
-                    id: 'food-marker-layer',
-                    type: 'circle',
-                    source: 'food-markers',
-                    paint: {
-                        'circle-radius': 8,
-                        'circle-color': '#FFB88C',
-                        'circle-stroke-width': 2,
-                        'circle-stroke-color': '#fff'
-                    }
-                });
-
-                // Marker layers
+                // Marker labels (names below pins)
                 map.current.addLayer({
                     id: 'food-marker-labels',
                     type: 'symbol',
@@ -195,47 +183,6 @@ function MapComponent({
                         'text-halo-color': '#fff',
                         'text-halo-width': 2
                     }
-                });
-
-                // Click handling
-                map.current.on('click', 'food-marker-layer', (e) => {
-                    const feature = e.features[0];
-                    const props = feature.properties;
-
-                    // Parse JSON strings to objects if needed
-                    const markerData = {
-                        ...props,
-                        // Parse stringified JSON fields
-                        schedules: typeof props.schedules === 'string'
-                        ? JSON.parse(props.schedules)
-                        : props.schedules
-                    };
-
-
-                    setSelectedMarker(markerData);
-
-                    if (onMarkerClick) {
-                        onMarkerClick(markerData);
-                    }
-
-                    // Center on selected marker
-                    map.current.flyTo({
-                        center: feature.geometry.coordinates,
-                        zoom: Math.max(map.current.getZoom(), 13),
-                    });
-                });
-
-                // Auto fetch directions on marker click (Debatable, will run token cost up when browsing)
-
-
-
-                // Cursor change on hover
-                map.current.on('mouseenter', 'food-marker-layer', () => {
-                    map.current.getCanvas().style.cursor = 'pointer';
-                });
-
-                map.current.on('mouseleave', 'food-marker-layer', () => {
-                    map.current.getCanvas().style.cursor = '';
                 });
             }
         };
@@ -278,9 +225,54 @@ function MapComponent({
     useEffect(() => {
         if (!mapLoaded || organizations.length === 0) return;
 
+        // Clear existing markers
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+
         const source = map.current.getSource('food-markers');
         if (!source) return;
 
+        // Create pin markers for each organization
+        organizations.forEach(org => {
+            const marker = new maplibregl.Marker({ color: '#6A7F5F' })
+                .setLngLat([org.longitude, org.latitude])
+                .addTo(map.current);
+
+            // Add click handler to the marker
+            marker.getElement().addEventListener('click', () => {
+                const markerData = {
+                    location_id: org.location_id,
+                    name: org.name,
+                    description: org.description || '',
+                    street_address: org.street_address || '',
+                    city: org.city || '',
+                    postal_code: org.postal_code || '',
+                    latitude: org.latitude,
+                    longitude: org.longitude,
+                    contacts: org.contacts || [],
+                    schedules: org.schedules || []
+                };
+
+                setSelectedMarker(markerData);
+
+                if (onMarkerClick) {
+                    onMarkerClick(markerData);
+                }
+
+                // Center on selected marker
+                map.current.flyTo({
+                    center: [org.longitude, org.latitude],
+                    zoom: Math.max(map.current.getZoom(), 13),
+                });
+            });
+
+            // Change cursor on hover
+            marker.getElement().style.cursor = 'pointer';
+
+            markersRef.current.push(marker);
+        });
+
+        // Add features for labels
         const features = organizations.map(org => ({
             type: 'Feature',
             geometry: {
@@ -288,33 +280,23 @@ function MapComponent({
                 coordinates: [org.longitude, org.latitude]
             }, 
             properties: {
-                location_id: org.location_id,
-                name: org.name,
-                description: org.description || '',
-                street_address: org.street_address || '',
-                city: org.city || '',
-                postal_code: org.postal_code || '',
-                latitude: org.latitude,
-                longitude: org.longitude,
-                // Include related data
-                contacts: JSON.stringify(org.contacts || []),
-                schedules: JSON.stringify(org.schedules || [])
+                name: org.name
             }
         }));
 
-    source.setData({
-        type: 'FeatureCollection', 
-        features: features
-    });
+        source.setData({
+            type: 'FeatureCollection', 
+            features: features
+        });
 
-    console.log(`Added ${features.length} markers to map.`)
-    // Fit bounds to show all markers
-    if (features.length > 1 && !userLocation) {
-        const bounds = new maplibregl.LngLatBounds();
-        features.forEach(f => bounds.extend(f.geometry.coordinates));
-        map.current.fitBounds(bounds, { padding: 50, maxZoom: 12});
-    }
-}, [organizations, mapLoaded])
+        console.log(`Added ${organizations.length} markers to map.`);
+        // Fit bounds to show all markers
+        if (organizations.length > 1 && !userLocation) {
+            const bounds = new maplibregl.LngLatBounds();
+            organizations.forEach(org => bounds.extend([org.longitude, org.latitude]));
+            map.current.fitBounds(bounds, { padding: 50, maxZoom: 12});
+        }
+    }, [organizations, mapLoaded]);
     
     // Recenter map
     const handleCenter = () => {
