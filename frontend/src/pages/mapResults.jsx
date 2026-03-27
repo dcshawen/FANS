@@ -5,11 +5,38 @@ import ResourceCard from '../components/resourceCard';
 
 const API_BASE_URL = 'http://localhost:8000';
 
+// Calculate distance between two coordinates using Haversine formula
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
 export default function MapResults() {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const navigate = useNavigate();
+
+  // Get user's location
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+        },
+        (error) => console.error('Geolocation error:', error)
+      );
+    }
+  }, []);
 
   useEffect(() => {
     fetchOrganizations();
@@ -38,8 +65,33 @@ export default function MapResults() {
     navigate('/');
   };
 
-  // Get first 3 organizations for display
-  const displayedOrganizations = organizations.slice(0, 3);
+  // Get 3 closest organizations based on user location
+  const getClosestOrganizations = () => {
+    if (!userLocation) {
+      // If no user location, return first 3 organizations with coordinates
+      return organizations
+        .filter(org => org.latitude != null && org.longitude != null)
+        .slice(0, 3);
+    }
+
+    // Calculate distance for each organization and sort by distance
+    const orgsWithDistance = organizations
+      .filter(org => org.latitude != null && org.longitude != null)
+      .map(org => ({
+        ...org,
+        distance: calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          org.latitude,
+          org.longitude
+        )
+      }))
+      .sort((a, b) => a.distance - b.distance);
+
+    return orgsWithDistance.slice(0, 3);
+  };
+
+  const displayedOrganizations = getClosestOrganizations();
 
   return (
     <div className="min-vh-100 d-flex flex-column" style={{ backgroundColor: '#FFF8F0' }}>

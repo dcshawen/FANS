@@ -91,7 +91,7 @@ export default function ResourcesList() {
               <input
                 type="text"
                 className="form-control border-start-0"
-                placeholder="Search by Name or Type"
+                placeholder="Search by organization name or tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ borderColor: '#6A7F5F' }}
