@@ -27,12 +27,6 @@ services:
     restart: unless-stopped
     networks:
       - fans-network
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
   backend:
     build:
@@ -45,8 +39,7 @@ services:
       - ./backend:/app
       - /app/__pycache__
     depends_on: 
-      db:
-        condition: service_healthy
+      - db
     networks: 
       - fans-network
 
