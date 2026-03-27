@@ -16,14 +16,6 @@ CREATE TABLE IF NOT EXISTS `Organization` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO `Organization`
-  (`name`, `description`, `street_address`, `city`, `postal_code`, `latitude`, `longitude`)
-VALUES
--- Hope Cottage
-('Hope Cottage',
- 'Eat-in and takeaway meals twice daily; menu varies.',
- '2435 Brunswick St', 'Halifax, NS', 'B3K 2Z4', NULL, NULL);
-
 
 -- Contact table (related to Organization)
 CREATE TABLE IF NOT EXISTS `Contact` (
