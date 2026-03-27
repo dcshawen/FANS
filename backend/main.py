@@ -56,6 +56,7 @@ def get_all_organizations(db: Session = Depends(get_db)):
             selectinload(OrganizationDB.contacts),
             selectinload(OrganizationDB.schedules),
             selectinload(OrganizationDB.food_offerings),
+            selectinload(OrganizationDB.tags),
         )
         .all()
     )
@@ -70,6 +71,7 @@ def get_organization(location_id: int, db: Session = Depends(get_db)):
             selectinload(OrganizationDB.contacts),
             selectinload(OrganizationDB.schedules),
             selectinload(OrganizationDB.food_offerings),
+            selectinload(OrganizationDB.tags),
         )
         .filter(OrganizationDB.location_id == location_id)
         .first()

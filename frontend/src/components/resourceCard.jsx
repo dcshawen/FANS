@@ -1,10 +1,36 @@
+import { useState, useEffect } from 'react';
+import DirectionsModal from './DirectionsModal';
+import { getRoute } from '../routes';
+
 export default function ResourceCard({ organization }) {
   const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
+  const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [loadingDirections, setLoadingDirections] = useState(false);
+  const [currentRoute, setCurrentRoute] = useState(null);
+
+  // Get user location using geolocation API
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([longitude, latitude]);
+        },
+        (error) => console.error('Geolocation error:', error)
+        );
+      }
+  }, []);
 
   // Get contact info from contacts
   const contact = contacts && contacts.length > 0 ? contacts[0] : null;
   const phoneNumber = contact?.phone_number;
   const websiteUrl = contact?.websit_url; // Note: API has typo "websit_url"
+  const displayTags = Array.isArray(tags)
+    ? tags
+        .map((tag) => (typeof tag === 'string' ? tag : tag?.tag))
+        .filter(Boolean)
+    : [];
 
   // Format address
   const formatAddress = () => {
@@ -48,7 +74,53 @@ export default function ResourceCard({ organization }) {
     return acc;
   }, {});
 
+  const handleOpenDirections = async () => {
+    if (!userLocation) {
+      alert('Could not determine your location. Please enable location services and try again.');
+      return;
+    }
+
+    setLoadingDirections(true);
+    try {
+      const apiKey = import.meta.env.VITE_GRAPH_API_KEY;
+      const url = `https://graphhopper.com/api/1/route?` +
+        `point=${userLocation[1]},${userLocation[0]}&` +
+        `point=${organization.latitude},${organization.longitude}&` +
+        `key=${apiKey}&` +
+        `locale=en&` +
+        `points_encoded=false&` +
+        `instructions=true`;
+
+      console.log('Fetching directions from resourceCard...');
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Route request failed');
+
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.paths && data.paths.length > 0) {
+        const route = data.paths[0];
+        console.log('Route instructions:', route.instructions);
+        setCurrentRoute(route);
+        setShowDirectionsModal(true);
+      } else {
+        alert('No route found');
+      }
+    } catch (error) {
+      console.error('Error fetching directions:', error);
+      alert('Could not find directions. Please try again.');
+    } finally {
+      setLoadingDirections(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowDirectionsModal(false);
+    setCurrentRoute(null);
+  };
+
   return (
+    <>
     <div className="card shadow rounded-3 overflow-hidden" style={{ border: '2px solid #6A7F5F' }}>
       {/* Green Header with Organization Name */}
       <div className="card-header py-2 text-center" style={{ backgroundColor: '#6A7F5F' }}>
@@ -61,22 +133,10 @@ export default function ResourceCard({ organization }) {
         <div className="row">
           {/* Left Column - Tags, Address & Contact */}
           <div className="col-12 col-md-6 d-flex flex-column align-items-center align-items-md-start ps-md-5">
-            {/* Placeholder Tags */}
-            <div className="mb-3">
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Hot Meals
-              </span>
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Lunch Service
-              </span>
-              <span className="badge me-2 mb-1" style={{ backgroundColor: '#6A7F5F' }}>
-                Community
-              </span>
-            </div>
             {/* Tags */}
-            {tags && tags.length > 0 && (
+            {displayTags.length > 0 && (
               <div className="mb-3">
-                {tags.map((tag, index) => (
+                {displayTags.map((tag, index) => (
                   <span 
                     key={index} 
                     className="badge me-2 mb-1"
@@ -156,7 +216,8 @@ export default function ResourceCard({ organization }) {
           <button 
             className="btn btn-sm d-flex align-items-center justify-content-center gap-1"
             style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.75rem', padding: '4px 10px' }}
-            onClick={() => alert('Directions feature coming soon!')}
+            onClick={handleOpenDirections}
+            disabled={loadingDirections || !userLocation}
           >
             <i className="bi bi-signpost-2"></i>
             Get Directions
@@ -164,5 +225,14 @@ export default function ResourceCard({ organization }) {
         </div>
       </div>
     </div>
+
+    {/* Directions Modal */}
+      <DirectionsModal
+        show={showDirectionsModal}
+        onClose={handleCloseModal}
+        destination={organization}
+        routeData={currentRoute}
+      />
+  </>
   );
 }

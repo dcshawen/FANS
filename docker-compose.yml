@@ -8,11 +8,8 @@ services:
     container_name: FANS-React-Dev
     ports:
       - "5173:5173"
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
     volumes:
-      - ./frontend:/app
+      - /${PWD}/frontend:/app
       - /app/node_modules
   db:
     image: mariadb:10.11
@@ -22,11 +19,9 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - ./backend/db_data:/var/lib/mysql
       - ./backend/initdb:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
-    networks:
-      - fans-network
 
   backend:
     build:
@@ -37,16 +32,3 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - /app/__pycache__
-    depends_on: 
-      - db
-    networks: 
-      - fans-network
-
-networks: 
-  fans-network:
-    driver: bridge
-
-volumes:
-  db_data:
-
