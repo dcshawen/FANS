@@ -14,7 +14,7 @@ export default function HomePage({ onGetStarted }) {
       className="vh-100 d-flex flex-column overflow-hidden" 
       style={{ background: 'linear-gradient(to bottom, #6A7F5F, #576653)' }}
     >
-      <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center px-3 px-md-4">
+      <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center px-3 px-md-4 pt-4 pt-md-5">
        
         <div className="bg-white rounded-3 p-2 mb-2 mb-md-3 shadow-lg">
           <img 
