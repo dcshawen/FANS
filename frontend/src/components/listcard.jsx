@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import DirectionsModal from './DirectionsModal';
+import LearnMoreModal from './LearnMoreModal';
 
 export default function ListCard({ organization }) {
   const { name, street_address, city, postal_code, schedules, contacts, tags } = organization;
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [loadingDirections, setLoadingDirections] = useState(false);
   const [currentRoute, setCurrentRoute] = useState(null);
@@ -183,6 +185,14 @@ export default function ListCard({ organization }) {
             <button 
               className="btn d-flex align-items-center gap-2"
               style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px' }}
+              onClick={() => setShowLearnMoreModal(true)}
+            >
+              <i className="bi bi-info-circle-fill"></i>
+              Learn More
+            </button>
+            <button 
+              className="btn d-flex align-items-center gap-2"
+              style={{ backgroundColor: '#6A7F5F', color: 'white', border: 'none', fontSize: '0.85rem', padding: '8px 16px', borderRadius: '6px' }}
               onClick={handleOpenDirections}
               disabled={loadingDirections}
             >
@@ -268,6 +278,11 @@ export default function ListCard({ organization }) {
             onClose={handleCloseModal}
             destination={organization}
             routeData={currentRoute}
+          />
+      <LearnMoreModal
+            show={showLearnMoreModal}
+            onClose={() => setShowLearnMoreModal(false)}
+            organization={organization}
           />
     </div>
     
