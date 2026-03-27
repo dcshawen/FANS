@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Protocol } from 'pmtiles';
 
 export default function LearnMoreModal({ show, onClose, organization }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const protocolInitialized = useRef(false);
 
   const { 
     name, 
@@ -50,34 +52,36 @@ export default function LearnMoreModal({ show, onClose, organization }) {
   useEffect(() => {
     if (!show || !mapContainerRef.current || !latitude || !longitude) return;
 
+    // Initialize PMTiles protocol
+    if (!protocolInitialized.current) {
+      const protocol = new Protocol();
+      maplibregl.addProtocol('pmtiles', protocol.tile);
+      protocolInitialized.current = true;
+    }
+
     // Small delay to ensure modal is rendered
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       if (mapRef.current) {
         mapRef.current.remove();
       }
 
+      // Load the same style as the main map
+      let mapStyle;
+      try {
+        const response = await fetch('/styles/cbmt-style.json');
+        if (response.ok) {
+          mapStyle = await response.json();
+        } else {
+          throw new Error('Style not found');
+        }
+      } catch (error) {
+        // Fallback to demo style
+        mapStyle = 'https://demotiles.maplibre.org/style.json';
+      }
+
       mapRef.current = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: {
-          version: 8,
-          sources: {
-            osm: {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors'
-            }
-          },
-          layers: [
-            {
-              id: 'osm-tiles',
-              type: 'raster',
-              source: 'osm',
-              minzoom: 0,
-              maxzoom: 19
-            }
-          ]
-        },
+        style: mapStyle,
         center: [longitude, latitude],
         zoom: 15
       });

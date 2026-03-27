@@ -106,7 +106,7 @@ export default function DirectionsModal({
                                 ))}
                             </div>
                             <small className="text-muted d-block mt-2">
-                                Multiple vehicle options will be available in a future update. Currently showing walking directions.
+                                Multiple vehicle options will be available in a future update. Currently showing driving directions.
                             </small>
                         </div>
 

@@ -19,10 +19,11 @@ export default function ResourcesList() {
     // Check organization name
     const nameMatch = org.name?.toLowerCase().includes(query);
     
-    // Check tags
-    const tagsMatch = org.tags?.some(tag => 
-      tag.toLowerCase().includes(query)
-    );
+    // Check tags (handle both string and object formats)
+    const tagsMatch = org.tags?.some(tag => {
+      const tagText = typeof tag === 'string' ? tag : tag?.tag;
+      return tagText?.toLowerCase().includes(query);
+    });
     
     return nameMatch || tagsMatch;
   });
